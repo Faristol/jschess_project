@@ -1,26 +1,91 @@
-import { Bishop } from "./piecesobjects/bishop";
+/*import { Bishop } from "./piecesobjects/bishop";
 import { King } from "./piecesobjects/king";
 import { Knight } from "./piecesobjects/knight";
 import { Pawn } from "./piecesobjects/pawn";
 import { Queen } from "./piecesobjects/queen";
-import { Rock } from "./piecesobjects/rock";
+import { Rock } from "./piecesobjects/rock";*/
+class PieceFather{
+    constructor(color,coordinates,type){
+        this.color = color;
+        this.coordinates = coordinates;
+        this.type=type;
+        this.setImage();
+
+    }
+    setImage(){
+        this.image = `../piecesimages/${this.type}${this.color}.png`;
+    }
+    kill(pieceToKill){
+        /*First of all, determine if the movement is valid. If it's valid and the piece can capture something, then call the function kill*/
+
+    }
+}
+class Bishop extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'bishop');
+    }
+    move(){
+
+    }
+}
+class King extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'king');
+    }
+    move(){
+
+    }
+}
+class Knight extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'knight');
+    }
+    move(){
+
+    }
+}
+class Pawn extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'pawn');
+    }
+    move(){
+
+    }
+}
+class Queen extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'queen');
+    }
+    move(){
+
+    }
+}
+class Rook extends PieceFather{
+    constructor(color,coordinates){
+        super(color,coordinates,'rook');
+    }
+    move(){
+
+    }
+}
+let gameState = {
+    piecesAlive : [],
+    start : false,
+    players: [],
+    piecesDead:[],
+    turn: 'player1',
+};
 
 document.addEventListener("DOMContentLoaded",start);
 function start(){
     /*create table and put pieces*/
-    let gameState = {
-        piecesAlive : [],
-        start : false,
-        players: [],
-        piecesDead:[],
-        turn: 'player1',
-    };
+    
     createTablePieces();
 }
 function createTablePieces(){
     let chessBoard = document.querySelector("#chessboard");
     /*make a array of constructors*/
-    let orderPiecesConstructors = [Rock,Knight,Bishop,King,Queen,Bishop,Knight,Rock];
+    let orderPiecesConstructors = [Rook,Knight,Bishop,King,Queen,Bishop,Knight,Rook];
     /*black top white down*/
     let charCode = 'a'.charCodeAt(0);
    for(let i=0;i<8;i++){
@@ -40,20 +105,24 @@ function createTablePieces(){
         if(i===0){
             /* rock,knight,bishop,king,queen,bishop,knight,rock: black*/
             gameState.piecesAlive.push(new orderPiecesConstructors[j]('black',column+row));
-            let index = gameState.piecesAlive.length-1;
-            let srcImage = gameState.piecesAlive[index].image;
-            square.setAttribute("src",srcImage);
-
-
         }else if(i===1){
             /*pawn: black*/
-
+            gameState.piecesAlive.push(new Pawn('black',column+row));
         }else if(i===6){
             /*pawn: white*/
-
+            gameState.piecesAlive.push(new Pawn('white',column+row));
         }else if(i===7){
             /* rock,knight,bishop,king,queen,bishop,knight,rock: white*/
-
+            gameState.piecesAlive.push(new orderPiecesConstructors[j]('white',column+row));
+        }
+         if([0,1,6,7].includes(i)){
+            let index = gameState.piecesAlive.length-1;
+            let srcImage = gameState.piecesAlive[index].image;
+            let image = document.createElement("img");
+            image.classList.add("piece");
+            image.src = srcImage;
+            
+            square.appendChild(image);
         }
         chessBoard.appendChild(square);
     }

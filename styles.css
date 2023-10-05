@@ -13,6 +13,9 @@
     margin: 0;
     padding: 0;
     border: none; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
 }
 
 .green {
@@ -21,6 +24,12 @@
 
 .white {
     background-color: #eeeed2;
+}
+.piece{
+    height: 84px;
+    width: 84px;
+    
+
 }
 
 
