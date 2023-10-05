@@ -1,0 +1,29 @@
+#chessboard {
+    width: 800px;
+    height: 800px;
+    border: 1px solid black;
+    position: relative;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: content-box;
+}
+
+.square {
+    width: 12.5%;
+    height: 12.5%;
+    display: inline-block;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: none; /* Elimina el borde entre cuadrados */
+}
+
+.green {
+    background-color: #769656;
+}
+
+.white {
+    background-color: #eeeed2;
+}
+
+
