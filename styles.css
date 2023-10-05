@@ -2,20 +2,17 @@
     width: 800px;
     height: 800px;
     border: 1px solid black;
-    position: relative;
     margin: 0 auto;
-    padding: 0;
-    box-sizing: content-box;
+    display: grid;
+    grid-template-columns: repeat(8, 100px); 
+    grid-template-rows: repeat(8, 100px); 
 }
 
 .square {
-    width: 12.5%;
-    height: 12.5%;
-    display: inline-block;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    border: none; /* Elimina el borde entre cuadrados */
+    border: none; 
 }
 
 .green {
