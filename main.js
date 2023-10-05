@@ -71,9 +71,12 @@ class Rook extends PieceFather{
 let gameState = {
     piecesAlive : [],
     start : false,
-    players: [],
+    players: {
+        'white':'pepe',
+        'black':'paco',
+    },
     piecesDead:[],
-    turn: 'player1',
+    turn: null,
 };
 
 document.addEventListener("DOMContentLoaded",start);
@@ -128,3 +131,13 @@ function createTablePieces(){
     }
    }
 }
+/*El joc començarà quan el jugador de les blanques faça un moviment valid, açò comporta
+1) clickar sobre la peça
+2) clickar a altre escac 
+Comprovacions:
+Aquesta peça pot fer aquest moviment?
+-> Si el pot fer-> el joc comença, es fa copia de l'estat i es canvia el torn
+
+Sistema de moviment-> click-click s'haura de tindre en compte que el destí 
+no siga la mateixa posicio a l'actual
+*/ 
