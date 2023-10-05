@@ -69,6 +69,7 @@ class Rook extends PieceFather{
     }
 }
 let gameState = {
+    movementTarget : [],
     piecesAlive : [],
     start : false,
     players: {
@@ -84,6 +85,7 @@ function start(){
     /*create table and put pieces*/
     
     createTablePieces();
+
 }
 function createTablePieces(){
     let chessBoard = document.querySelector("#chessboard");
@@ -104,6 +106,7 @@ function createTablePieces(){
         let square = document.createElement("span");
         square.classList.add(color);
         square.classList.add("square");
+        square.addEventListener("click",captureAction);
         square.id = column+row;
         if(i===0){
             /* rock,knight,bishop,king,queen,bishop,knight,rock: black*/
@@ -124,7 +127,7 @@ function createTablePieces(){
             let image = document.createElement("img");
             image.classList.add("piece");
             image.src = srcImage;
-            
+            image.id = column+row;
             square.appendChild(image);
         }
         chessBoard.appendChild(square);
@@ -141,3 +144,22 @@ Aquesta peça pot fer aquest moviment?
 Sistema de moviment-> click-click s'haura de tindre en compte que el destí 
 no siga la mateixa posicio a l'actual
 */ 
+/*de moment sols posarem dos condicions-> destí no siga el mateix a la posició actual
+i que no hi haja cap peça seua en la casella destí*/
+function captureAction(e){
+    let element = e.target;
+    if(gameState.movementTarget.length===0){
+        gameState.movementTarget.push(element);
+    }else if(gameState.movementTarget.length===1){
+        gameState.movementTarget.push(element);
+        let positionFinal = element.id;
+        let copyImg = gameState.movementTarget[0].cloneNode(true);
+        copyImg.id=positionFinal;
+        element.appendChild(copyImg);
+        gameState.movementTarget = [];
+    }
+
+}
+function game(){
+
+}
