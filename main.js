@@ -23,7 +23,7 @@ function start(){
     /*create table and put pieces*/
     
     createTablePieces();
-    game();
+    /*game();*/
 
 }
 function createTablePieces(){
@@ -70,7 +70,7 @@ function createTablePieces(){
             image.classList.add("piece");
             image.src = srcImage;
             image.id = column+row;*/
-            square.id=gameState.piecesAlive[index].type+gameState.piecesAlive[index].color;
+            square.id=gameState.piecesAlive[index].type+gameState.piecesAlive[index].color+"_";
             square.textContent=unicodeValuePiece;
         }
         square.id += column+row;
@@ -94,38 +94,70 @@ function captureAction(e){
     let element = e.target;
     /*si l'array capturador d'events esta buit i a més el contingut de la casella es diferent a 0, bingo, a ha marcat una peça, 
     serà correcta? */
-    if(e.target.textContent.length!==0&&movementTarget.length===0){
-        if(e.target.id.includes(gameState.turn)){
+    if(element.textContent.length!==0&&movementTarget.length===0){
+        if(element.id.includes(gameState.turn)){
             /*ha elegit una peça que correspon en color al torn*/
             /*guardem el e.target al movementTarget*/
+            movementTarget.push(element);
         }
+        /*  quines condicions elementals s'han de complir per a que el següent moviment siga 
+        candidat a validar?*/
+        /*A)El escac marcat esta buit
+        B) L'escac marcat esta ocupat per una peca de color opost
+        */
+       console.log("hola");
+    }else if(element.textContent.length===0&&movementTarget.length===1){
+        /*Condicio A
+        si es esta buida, passarem a validar el moviment tinguent en compte
+        posicio inicial, posicio final, regles propies de la peça
+        de moment la mourem i iau
+        fer una funcio isValid() per a cada peça
+        fer una funcio move per a moure;
+        */
+       movementTarget.push(element);
+       movePiece(movementTarget);
+       movementTarget = [];
+       changeTurn();
+       
+       
 
-    }else if(){
 
     }
-    if(gameState.movementTarget.length===0){
-        gameState.movementTarget.push(element);
-    }else if(gameState.movementTarget.length===1){
-        gameState.movementTarget.push(element);
-        let positionFinal = element.id;
-        let copyImg = gameState.movementTarget[0].cloneNode(true);
-        copyImg.id=positionFinal;
-        element.appendChild(copyImg);
-        gameState.movementTarget = [];
-    }
+    
 
 }
 function game(){
-    enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));
+    /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
 
 }
 function enableDisableMovementPlayerColor(colorEnableMove,colorDisableMove){
     /*fer que soles es poden moure les blanques o negres, segons el torn*/
     /*al primer torn, per cocos, haura de fer click en una peca del seu color, el segon click no, pot ser avançe a un escac buit o ple*/
+    /*aço mes avant quan introduïm el tema d'usuaris i tal*/
     
 
 
 }
-function changeTurn(turn){
+function changeTurn(){
+    gameState.turn=(gameState.turn==='white'?'black':'white');
+}
+function movePiece(movementTarget){
+    /*primer element posicio inicial*/
+    let pieceToMove = movementTarget[0];
+    let destination = movementTarget[1];
+    /*atributs i estructura de dades a tindre en compte*/
+    /*id i textContent*/
+    let idPieceToMove = pieceToMove.id;
+    let idPieceToMoveWhitoutPiece = idPieceToMove.split("_")[1];
+    let idPieceName = idPieceToMove.split("_")[0];
+    let unicodePieceToMove = pieceToMove.textContent;
+    /*canviem el nom de la peça a l'escac i li llevem el unicode*/
+    pieceToMove.id = idPieceToMoveWhitoutPiece;
+    pieceToMove.textContent = "";
+    /*li posem l'unicode i el nou id a destination*/
+    destination.id = idPieceName+"_"+destination.id;
+    destination.textContent=unicodePieceToMove;
+    
+
 
 }
