@@ -118,10 +118,6 @@ function captureAction(e){
        movePiece(movementTarget);
        movementTarget = [];
        changeTurn();
-       
-       
-
-
     }
     
 
@@ -148,6 +144,7 @@ function movePiece(movementTarget){
     /*atributs i estructura de dades a tindre en compte*/
     /*id i textContent*/
     let idPieceToMove = pieceToMove.id;
+    
     let idPieceToMoveWhitoutPiece = idPieceToMove.split("_")[1];
     let idPieceName = idPieceToMove.split("_")[0];
     let unicodePieceToMove = pieceToMove.textContent;
@@ -157,7 +154,13 @@ function movePiece(movementTarget){
     /*li posem l'unicode i el nou id a destination*/
     destination.id = idPieceName+"_"+destination.id;
     destination.textContent=unicodePieceToMove;
+    refreshPositionPiecesAlive(idPieceToMoveWhitoutPiece,destination.id.split("_")[1]);
     
 
 
+}
+function refreshPositionPiecesAlive(idDestination0,idDestinationF){
+    /*actualitzem l'element mogut a la nova coordenada*/
+    let index = gameState.piecesAlive.findIndex((piece) => piece.coordinates == idDestination0);
+    if(index!==-1) gameState.piecesAlive[index].coordinates = idDestinationF;
 }
