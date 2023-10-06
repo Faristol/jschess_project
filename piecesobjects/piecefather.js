@@ -1,3 +1,4 @@
+export {PieceFather};
 class PieceFather{
     constructor(color,coordinates,type){
         this.color = color;

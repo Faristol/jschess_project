@@ -1,73 +1,11 @@
-/*import { Bishop } from "./piecesobjects/bishop";
-import { King } from "./piecesobjects/king";
-import { Knight } from "./piecesobjects/knight";
-import { Pawn } from "./piecesobjects/pawn";
-import { Queen } from "./piecesobjects/queen";
-import { Rock } from "./piecesobjects/rock";*/
-class PieceFather{
-    constructor(color,coordinates,type){
-        this.color = color;
-        this.coordinates = coordinates;
-        this.type=type;
-        this.setImage();
+import { Bishop } from "./piecesobjects/bishop.js";
+import { King } from "./piecesobjects/king.js";
+import { Knight } from "./piecesobjects/knight.js";
+import { Pawn } from "./piecesobjects/pawn.js";
+import { Queen } from "./piecesobjects/queen.js";
+import { Rook } from "./piecesobjects/rook.js";
+import { PieceFather } from "./piecesobjects/piecefather.js";
 
-    }
-    setImage(){
-        this.image = `../piecesimages/${this.type}${this.color}.png`;
-    }
-    kill(pieceToKill){
-        /*First of all, determine if the movement is valid. If it's valid and the piece can capture something, then call the function kill*/
-
-    }
-}
-class Bishop extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'bishop');
-    }
-    move(){
-
-    }
-}
-class King extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'king');
-    }
-    move(){
-
-    }
-}
-class Knight extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'knight');
-    }
-    move(){
-
-    }
-}
-class Pawn extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'pawn');
-    }
-    move(){
-
-    }
-}
-class Queen extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'queen');
-    }
-    move(){
-
-    }
-}
-class Rook extends PieceFather{
-    constructor(color,coordinates){
-        super(color,coordinates,'rook');
-    }
-    move(){
-
-    }
-}
 let gameState = {
     movementTarget : [],
     piecesAlive : [],

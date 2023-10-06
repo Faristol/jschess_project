@@ -1,7 +1,8 @@
-export {Rock};
-class Rock extends PieceFather{
+export {Rook};
+import { PieceFather } from "./piecefather.js";
+class Rook extends PieceFather{
     constructor(color,coordinates){
-        super(color,coordinates,'rock');
+        super(color,coordinates,'rook');
     }
     move(){
 
