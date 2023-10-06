@@ -16,6 +16,7 @@
     display: flex;
     justify-content: center; 
     align-items: center;
+    font-size: 80px;
 }
 
 .green {
@@ -25,11 +26,6 @@
 .white {
     background-color: #eeeed2;
 }
-.piece{
-    height: 100px;
-    width: 100px;
-    
 
-}
 
 

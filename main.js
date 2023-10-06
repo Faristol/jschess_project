@@ -4,10 +4,10 @@ import { Knight } from "./piecesobjects/knight.js";
 import { Pawn } from "./piecesobjects/pawn.js";
 import { Queen } from "./piecesobjects/queen.js";
 import { Rook } from "./piecesobjects/rook.js";
-import { PieceFather } from "./piecesobjects/piecefather.js";
+import {PieceFather} from "./piecesobjects/piecefather.js";
 
+let movementTarget = [];
 let gameState = {
-    movementTarget : [],
     piecesAlive : [],
     start : false,
     players: {
@@ -15,7 +15,7 @@ let gameState = {
         'black':'paco',
     },
     piecesDead:[],
-    turn: null,
+    turn: 'white',
 };
 
 document.addEventListener("DOMContentLoaded",start);
@@ -23,6 +23,7 @@ function start(){
     /*create table and put pieces*/
     
     createTablePieces();
+    game();
 
 }
 function createTablePieces(){
@@ -45,10 +46,11 @@ function createTablePieces(){
         square.classList.add(color);
         square.classList.add("square");
         square.addEventListener("click",captureAction);
-        square.id = column+row;
+        
         if(i===0){
             /* rock,knight,bishop,king,queen,bishop,knight,rock: black*/
             gameState.piecesAlive.push(new orderPiecesConstructors[j]('black',column+row));
+            square.classList
         }else if(i===1){
             /*pawn: black*/
             gameState.piecesAlive.push(new Pawn('black',column+row));
@@ -61,13 +63,17 @@ function createTablePieces(){
         }
          if([0,1,6,7].includes(i)){
             let index = gameState.piecesAlive.length-1;
-            let srcImage = gameState.piecesAlive[index].image;
+            
+            let unicodeValuePiece = gameState.piecesAlive[index].unicodePiece;
+            /*
             let image = document.createElement("img");
             image.classList.add("piece");
             image.src = srcImage;
-            image.id = column+row;
-            square.appendChild(image);
+            image.id = column+row;*/
+            square.id=gameState.piecesAlive[index].type+gameState.piecesAlive[index].color;
+            square.textContent=unicodeValuePiece;
         }
+        square.id += column+row;
         chessBoard.appendChild(square);
     }
    }
@@ -86,6 +92,17 @@ no siga la mateixa posicio a l'actual
 i que no hi haja cap peça seua en la casella destí*/
 function captureAction(e){
     let element = e.target;
+    /*si l'array capturador d'events esta buit i a més el contingut de la casella es diferent a 0, bingo, a ha marcat una peça, 
+    serà correcta? */
+    if(e.target.textContent.length!==0&&movementTarget.length===0){
+        if(e.target.id.includes(gameState.turn)){
+            /*ha elegit una peça que correspon en color al torn*/
+            /*guardem el e.target al movementTarget*/
+        }
+
+    }else if(){
+
+    }
     if(gameState.movementTarget.length===0){
         gameState.movementTarget.push(element);
     }else if(gameState.movementTarget.length===1){
@@ -99,5 +116,16 @@ function captureAction(e){
 
 }
 function game(){
+    enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));
+
+}
+function enableDisableMovementPlayerColor(colorEnableMove,colorDisableMove){
+    /*fer que soles es poden moure les blanques o negres, segons el torn*/
+    /*al primer torn, per cocos, haura de fer click en una peca del seu color, el segon click no, pot ser avançe a un escac buit o ple*/
+    
+
+
+}
+function changeTurn(turn){
 
 }
