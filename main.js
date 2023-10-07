@@ -222,11 +222,13 @@ function movePiece(movementTarget) {
   let idPieceName = idPieceToMove.split("_")[0];
   let unicodePieceToMove = pieceToMove.textContent;
   /*canviem el nom de la peça a l'escac i li llevem el unicode*/
+  
   pieceToMove.id = idPieceToMoveWhitoutPiece;
   pieceToMove.textContent = "";
   /*li posem l'unicode i el nou id a destination*/
   destination.id = idPieceName + "_" + destination.id;
   destination.textContent = unicodePieceToMove;
+ 
   refreshPositionPiecesAlive(
     idPieceToMoveWhitoutPiece,
     destination.id.split("_")[1]
@@ -239,8 +241,12 @@ function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
-  let copyPieceToKill = {...movementTarget[1]};
-  let copyPieceKiller = {...movementTarget[0]};
+  let [copyPieceToKill,copyPieceKiller]=movementTarget;
+
+  refreshMovementWhiteBlackKill(copyPieceKiller,copyPieceToKill);
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
+
+  
   
 
   let idPieceKiller = pieceKiller.id;
@@ -257,10 +263,10 @@ function killPiece(movementTarget) {
     "_" +
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
-  refreshMovementWhiteBlackKill(copyPieceKiller,copyPieceToKill);
+  
   /*abans d'actualitzar les peces vives i mortes refrescarem el array que captura el moviment, sino no registraria la peça capturada,
   ja q ja estaria borrada de les pecesAlive*/
-  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
+  
 }
 
 
@@ -271,6 +277,7 @@ function refreshMovementWhiteBlackOnlyMove(idPiece) {
   } else {
     findAndPushPieceToMoveWhiteBlack(idPiece);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
+    gameState.movementRegister.forEach((moviment) => console.log(moviment));
     gameState.movementWhiteBlack = [];
   }
 }
@@ -282,6 +289,7 @@ function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill) {
   } else {
     findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
+    gameState.movementRegister.forEach((moviment) => console.log(moviment));
     gameState.movementWhiteBlack = [];
   }
 }
