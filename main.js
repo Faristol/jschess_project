@@ -8,6 +8,12 @@ import { PieceFather } from "./piecesobjects/piecefather.js";
 
 let movementTarget = [];
 let gameState = {
+  /*ací es guardaran tots els moviments*/
+  /* cada vegada que es faça un moviment white and black, s'afegirà a movment register, en forma d'array*/
+  /*periòdicament es farà una comprovació per veure si els 3 ultims elements de l'array son iguals*/
+  /*si ho són -> draw by bucle*/
+  movementRegister: [],
+  movementWhiteBlack: [],
   piecesAlive: [],
   start: false,
   /* aci no estaria demés fer varies variables
@@ -25,6 +31,11 @@ let gameState = {
   },
   piecesDead: [],
   turn: "white",
+  stalemate: "false",
+  checkmate: "false",
+  check: "false",
+  chessCastling: "false",
+  kingMove: "false",
 };
 
 document.addEventListener("DOMContentLoaded", start);
@@ -32,7 +43,7 @@ function start() {
   /*create table and put pieces*/
 
   createTablePieces();
-  /*game();*/
+  game();
 }
 function createTablePieces() {
   let chessBoard = document.querySelector("#chessboard");
@@ -107,6 +118,7 @@ function createTablePieces() {
       chessBoard.appendChild(square);
     }
   }
+  gameState.start = true;
 }
 /*El joc començarà quan el jugador de les blanques faça un moviment valid, açò comporta
 1) clickar sobre la peça
@@ -127,7 +139,6 @@ function captureAction(e) {
     serà correcta? */
   if (element.textContent.length !== 0 && movementTarget.length === 0) {
     if (element.id.includes(gameState.turn)) {
-
       /*ha elegit una peça que correspon en color al torn*/
       /*guardem el e.target al movementTarget*/
       movementTarget.push(element);
@@ -159,7 +170,6 @@ function captureAction(e) {
     ) {
       movementTarget.push(element);
 
-
       /*aci aprofitarem i controlarem dos casos
 
         1)Si el segon click el fa sobre una peça del seu color-> no passa absolutament res
@@ -172,16 +182,12 @@ function captureAction(e) {
         , si fos invalid, passaria com el cas (1),) la mata, s'actualitza la funció pieces alive i s'afegix a les peces mortes
         */
       if (movementTarget[1].id.includes(gameState.turn)) {
-
-
         /*clavar condicio per a veure si es un enroc*/
 
         /**/
         movementTarget = [];
-      } else if(!movementTarget[1].id.includes(gameState.turn)) {
+      } else if (!movementTarget[1].id.includes(gameState.turn)) {
         /*peça de color opost*/
-  
-
 
         killPiece(movementTarget);
         movementTarget = [];
@@ -192,6 +198,14 @@ function captureAction(e) {
 }
 function game() {
   /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
+  if (gameState.start && gameState.movementWhiteBlack.length === 2) {
+    /*fem la copia*/
+    return game();
+  } else if (!gameState.start) {
+    return gameEnd();
+  }
+  /*si arriba ací el joc encara esta en start, però falta 1 moviment x a fer la copia*/
+  return game();
 }
 function enableDisableMovementPlayerColor(colorEnableMove, colorDisableMove) {
   /*fer que soles es poden moure les blanques o negres, segons el torn*/
@@ -222,6 +236,9 @@ function movePiece(movementTarget) {
     idPieceToMoveWhitoutPiece,
     destination.id.split("_")[1]
   );
+  /*actualitzem l'array moviment-> si al fer push la long es = 2 -> introduim l'array en el movement register
+   */
+  refreshMovementWhiteBlackOnlyMove(destination);
 }
 function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
@@ -244,8 +261,10 @@ function killPiece(movementTarget) {
     "_" +
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
-  refreshPiecesDead(copyPieceToKill,copyPieceKiller);
-  
+  refreshMovementWhiteBlackKill(copyPieceToKill, copyPieceKiller);
+  /*abans d'actualitzar les peces vives i mortes refrescarem el array que captura el moviment, sino no registraria la peça capturada,
+  ja q ja estaria borrada de les pecesAlive*/
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
 }
 function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
   /*actualitzem l'element mogut a la nova coordenada*/
@@ -254,15 +273,64 @@ function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
   );
   if (index !== -1) gameState.piecesAlive[index].coordinates = idDestinationF;
 }
-function refreshPiecesDead(copyPieceToKill,copyPieceKiller){
+function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
   let coordinates = copyPieceToKill.id.split("_")[1];
-  let index = gameState.piecesAlive.findIndex((piece) => piece.coordinates = coordinates);
-  if(index !== -1){
+  let index = gameState.piecesAlive.findIndex(
+    (piece) => (piece.coordinates = coordinates)
+  );
+  if (index !== -1) {
     let element = gameState.piecesAlive[index];
     gameState.piecesDead.push(element);
     gameState.piecesAlive.splice(index);
     let coordinates0 = copyPieceKiller.id.split("_")[1];
-    refreshPositionPiecesAlive(coordinates0,coordinates);
+    refreshPositionPiecesAlive(coordinates0, coordinates);
   }
+}
+function gameEnd() {}
+function refreshMovementWhiteBlackOnlyMove(idPiece) {
+  if (gameState.movementWhiteBlack.length === 0) {
+    findAndPushPieceToMoveWhiteBlack(idPiece);
+  } else {
+    findAndPushPieceToMoveWhiteBlack(idPiece);
+    gameState.movementRegister.push(gameState.movementWhiteBlack);
+    gameState.movementWhiteBlack = [];
+  }
+}
+function refreshMovementWhiteBlackKill(idPiece1, idPiece2) {
+  if (gameState.movementWhiteBlack.length === 0) {
+    findAndPushPieceToKillWhiteBlack(idPiece1, idPiece2);
+  } else {
+    findAndPushPieceToKillWhiteBlack(idPiece1, idPiece2);
+    gameState.movementRegister.push(gameState.movementWhiteBlack);
+    gameState.movementWhiteBlack = [];
+  }
+}
+function findAndPushPieceToMoveWhiteBlack(idPiece) {
+  let piece = gameState.piecesAlive.find(
+    (piece) => piece.coordinates === idPiece.split("_")[1]
+  );
+  let notationName = piece.notationName;
+  let coordinates = piece.coordinates;
+  gameState.movementWhiteBlack.push(notationName + coordinates);
+}
+function findAndPushPieceToKillWhiteBlack(idPiece1, idPiece2) {
+  let pieceKiller = gameState.piecesAlive.find(
+    (piece) => piece.coordinates === idPiece1.split("_")[1]
+  );
+  let notationNamePieceKiller = pieceKiller.notationName;
+  let coordinatesPieceKiller = pieceKiller.coordinates;
+  /*el mateix per a la peça a capturar*/
+  let pieceToKill = gameState.piecesAlive.find(
+    (piece) => piece.coordinates === idPiece2.split("_")[1]
+  );
+  let notationNamePieceToKill = pieceToKill.notationName;
+  let coordinatesPieceToKill = pieceToKill.coordinates;
 
+  gameState.movementWhiteBlack.push(
+    notationNamePieceKiller +
+      coordinatesPieceKiller +
+      "x" +
+      notationNamePieceToKill +
+      coordinatesPieceToKill
+  );
 }
