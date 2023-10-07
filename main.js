@@ -127,6 +127,7 @@ function captureAction(e) {
     serà correcta? */
   if (element.textContent.length !== 0 && movementTarget.length === 0) {
     if (element.id.includes(gameState.turn)) {
+
       /*ha elegit una peça que correspon en color al torn*/
       /*guardem el e.target al movementTarget*/
       movementTarget.push(element);
@@ -156,7 +157,8 @@ function captureAction(e) {
       element.textContent.length !== 0 &&
       movementTarget.length === 1
     ) {
-      console.log("hola");
+      movementTarget.push(element);
+
 
       /*aci aprofitarem i controlarem dos casos
 
@@ -169,17 +171,18 @@ function captureAction(e) {
         2)Si el segon click el fa sobre una peça de color opost(, de moment no controlarem si es valid el moviment
         , si fos invalid, passaria com el cas (1),) la mata, s'actualitza la funció pieces alive i s'afegix a les peces mortes
         */
-      if (movementTarget[0].id.includes(gameState.turn)) {
-        console.log("hola");
+      if (movementTarget[1].id.includes(gameState.turn)) {
+
+
         /*clavar condicio per a veure si es un enroc*/
 
         /**/
         movementTarget = [];
-      } else {
+      } else if(!movementTarget[1].id.includes(gameState.turn)) {
         /*peça de color opost*/
-        console.log("hola");
+  
 
-        movementTarget.push(element);
+
         killPiece(movementTarget);
         movementTarget = [];
         changeTurn();
@@ -224,6 +227,9 @@ function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
+  let copyPieceToKill = movementTarget[1];
+  let copyPieceKiller = movementTarget[0];
+
   let idPieceKiller = pieceKiller.id;
   let unicodePieceKiller = pieceKiller.textContent;
 
@@ -238,6 +244,8 @@ function killPiece(movementTarget) {
     "_" +
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
+  refreshPiecesDead(copyPieceToKill,copyPieceKiller);
+  
 }
 function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
   /*actualitzem l'element mogut a la nova coordenada*/
@@ -245,4 +253,16 @@ function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
     (piece) => piece.coordinates == idDestination0
   );
   if (index !== -1) gameState.piecesAlive[index].coordinates = idDestinationF;
+}
+function refreshPiecesDead(copyPieceToKill,copyPieceKiller){
+  let coordinates = copyPieceToKill.id.split("_")[1];
+  let index = gameState.piecesAlive.findIndex((piece) => piece.coordinates = coordinates);
+  if(index !== -1){
+    let element = gameState.piecesAlive[index];
+    gameState.piecesDead.push(element);
+    gameState.piecesAlive.splice(index);
+    let coordinates0 = copyPieceKiller.id.split("_")[1];
+    refreshPositionPiecesAlive(coordinates0,coordinates);
+  }
+
 }
