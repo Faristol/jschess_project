@@ -141,6 +141,16 @@ function captureAction(e) {
     if (element.id.includes(gameState.turn)) {
       /*ha elegit una peça que correspon en color al torn*/
       /*guardem el e.target al movementTarget*/
+
+
+      /*IMPORTANTISSIM, ACI PREVIAMENT A CLAVAR AL TARGET DINS O NO, HAUREM DE VEURE
+      SI EL SEU REI ESTÀ EN JAKE, SI HO ESTÀ NO ES GUARDARÀ EL EVENT EN L'ARRAY, FINS QUE NO CLICKE
+      SOBRE EL REI.
+      */
+
+
+
+
       movementTarget.push(element);
     }
     /*  quines condicions elementals s'han de complir per a que el següent moviment siga 
@@ -160,7 +170,20 @@ function captureAction(e) {
         //TO DO
         fer una funcio isMovementValid() per a cada peça
         */
+      
+      
       movementTarget.push(element);
+     
+
+      const movementStarts = movementTarget[0].cloneNode(true);
+      const movementEnds = movementTarget[1].cloneNode(true);
+      let start = movementStarts.id.split("_")[1];
+      let end = movementEnds.id;
+      let pieceType = movementStarts.id.split("_")[0].slice(0,-5) ;
+
+     
+      
+      isMovementValidHandler(start,end,pieceType);
       movePiece(movementTarget);
       movementTarget = [];
       changeTurn();
@@ -195,12 +218,14 @@ function captureAction(e) {
       }
     }
   }
+  game();
 }
 function game() {
   /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
- 
   /*si arriba ací el joc encara esta en start, però falta 1 moviment x a fer la copia*/
-  
+  if(!gameState.start){
+
+  }
 }
 function enableDisableMovementPlayerColor(colorEnableMove, colorDisableMove) {
   /*fer que soles es poden moure les blanques o negres, segons el torn*/
@@ -222,13 +247,13 @@ function movePiece(movementTarget) {
   let idPieceName = idPieceToMove.split("_")[0];
   let unicodePieceToMove = pieceToMove.textContent;
   /*canviem el nom de la peça a l'escac i li llevem el unicode*/
-  
+
   pieceToMove.id = idPieceToMoveWhitoutPiece;
   pieceToMove.textContent = "";
   /*li posem l'unicode i el nou id a destination*/
   destination.id = idPieceName + "_" + destination.id;
   destination.textContent = unicodePieceToMove;
- 
+
   refreshPositionPiecesAlive(
     idPieceToMoveWhitoutPiece,
     destination.id.split("_")[1]
@@ -241,19 +266,10 @@ function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
-
-
-/*fem copies de de l'element DOM*/
-
+  /*fem copies de de l'element DOM*/
 
   const copyPieceKiller = pieceKiller.cloneNode(true);
   const copyPieceToKill = pieceToKill.cloneNode(true);
-
-
- 
-
-  
-  
 
   let idPieceKiller = pieceKiller.id;
   let unicodePieceKiller = pieceKiller.textContent;
@@ -270,18 +286,12 @@ function killPiece(movementTarget) {
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
 
-
-  
-
-  refreshMovementWhiteBlackKill(copyPieceKiller,copyPieceToKill);
+  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill);
   refreshPiecesDead(copyPieceToKill, copyPieceKiller);
 
-  
   /*abans d'actualitzar les peces vives i mortes refrescarem el array que captura el moviment, sino no registraria la peça capturada,
   ja q ja estaria borrada de les pecesAlive*/
-  
 }
-
 
 function gameEnd() {}
 function refreshMovementWhiteBlackOnlyMove(idPiece) {
@@ -295,7 +305,6 @@ function refreshMovementWhiteBlackOnlyMove(idPiece) {
 }
 
 function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill) {
-
   if (gameState.movementWhiteBlack.length === 0) {
     findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill);
   } else {
@@ -313,13 +322,12 @@ function findAndPushPieceToMoveWhiteBlack(idPiece) {
   gameState.movementWhiteBlack.push(notationName + coordinates);
 }
 function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
-
   let coordinatesPieceKiller = pieceKiller.id.split("_")[1];
   let killer = gameState.piecesAlive.find(
     (piece) => piece.coordinates === coordinatesPieceKiller
   );
-  let notationNamePieceK =killer.notationName;
-  let coordinatesPieceK= killer.coordinates;
+  let notationNamePieceK = killer.notationName;
+  let coordinatesPieceK = killer.coordinates;
   /*el mateix per a la peça a capturar*/
   let coordinatesPieceToKill = pieceToKill.id.split("_")[1];
   let toKill = gameState.piecesAlive.find(
@@ -329,10 +337,10 @@ function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
   let coordinatesPieceToK = toKill.coordinates;
 
   gameState.movementWhiteBlack.push(
-    notationNamePieceK+
+    notationNamePieceK +
       coordinatesPieceK +
       "x" +
-      notationNamePieceToK+
+      notationNamePieceToK +
       coordinatesPieceToK
   );
 }
@@ -351,8 +359,71 @@ function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
   if (index !== -1) {
     let element = gameState.piecesAlive[index];
     gameState.piecesDead.push(element);
-    gameState.piecesAlive.splice(index,1);
+    gameState.piecesAlive.splice(index, 1);
     let coordinates0 = copyPieceKiller.id.split("_")[1];
     refreshPositionPiecesAlive(coordinates0, coordinates);
   }
+}
+function isMovementValidHandler(start,end,pieceType){
+  const pieceObject = getPieceObject(start,pieceType);
+  /*cridar a funcio booleana per veure si hi han peces en mig*/
+  const hasPieces = havingPiecesInBetween(start,end);
+
+  const valid = pieceObject.valid(start,end,hasPieces);
+
+
+}
+function getPieceObject(start,pieceType){
+  let pieceObject = gameState.piecesAlive.find(
+    (piece) => piece.coordinates === start && piece.type === piece
+  );
+  return pieceObject;
+}
+function hasPieces(start,end){
+  /*primer veure si es un moviment horizontal, vertical, diagonal, o, és una L (cavall)*/
+  /*HORIZONTAL->  numero constant varia lletra*/
+  /*VERTICAL ->  numero variable lletra constant*/
+  const startLetterNumber = start.split("");
+  const endLetterNumber = end.split("");
+  if(startLetterNumber[0]===endLetterNumber[0]){
+    /*VERTICAL*/
+    if(parseInt(startLetterNumber[1])<endLetterNumber[1]){
+      /*Moviment vertical ascendent*/
+      /*ara obtinguem el rang de valors que hi ha del numero menut al gran*/
+      /*despres recorreguent l'array de peces vives vegem si hi ha alguna que coincideix amb la posicio*/
+      let range = range(startLetterNumber[1],endLetterNumber[1],startLetterNumber[0]);
+      let index = gameState.piecesAlive.findIndex(
+        (piece) => (range.includes(piece.coordinates))
+      );
+      if(index===-1){
+        /*no hi ha cap peça que impedixca la trajectoria*/
+        return false;
+      }else{
+        return true;
+      }
+
+    }else{
+      /*Moviment vertical descendent*/
+      let range = range(endLetterNumber[1],startLetterNumber[1],startLetterNumber[0]);
+      let index = gameState.piecesAlive.findIndex(
+        (piece) => (range.includes(piece.coordinates))
+      );
+      if(index===-1){
+        /*no hi ha cap peça que impedixca la trajectoria*/
+        return false;
+      }else{
+        return true;
+      }
+    }
+    }
+
+
+}
+function range(min,max,letter){
+  var range = [];
+  /*rang sense incloure els extrems*/
+  for(let i=min+1;i<max;i++){
+    range.push(letter+i);
+  }
+  return range;
 }
