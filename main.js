@@ -241,10 +241,16 @@ function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
-  let [copyPieceToKill,copyPieceKiller]=movementTarget;
 
-  refreshMovementWhiteBlackKill(copyPieceKiller,copyPieceToKill);
-  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
+
+/*fem copies de de l'element DOM*/
+
+
+  const copyPieceKiller = pieceKiller.cloneNode(true);
+  const copyPieceToKill = pieceToKill.cloneNode(true);
+
+
+ 
 
   
   
@@ -263,6 +269,13 @@ function killPiece(movementTarget) {
     "_" +
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
+
+
+  
+
+  refreshMovementWhiteBlackKill(copyPieceKiller,copyPieceToKill);
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
+
   
   /*abans d'actualitzar les peces vives i mortes refrescarem el array que captura el moviment, sino no registraria la peça capturada,
   ja q ja estaria borrada de les pecesAlive*/
@@ -277,7 +290,6 @@ function refreshMovementWhiteBlackOnlyMove(idPiece) {
   } else {
     findAndPushPieceToMoveWhiteBlack(idPiece);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
-    gameState.movementRegister.forEach((moviment) => console.log(moviment));
     gameState.movementWhiteBlack = [];
   }
 }
@@ -289,7 +301,6 @@ function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill) {
   } else {
     findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
-    gameState.movementRegister.forEach((moviment) => console.log(moviment));
     gameState.movementWhiteBlack = [];
   }
 }
@@ -307,7 +318,6 @@ function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
   let killer = gameState.piecesAlive.find(
     (piece) => piece.coordinates === coordinatesPieceKiller
   );
-
   let notationNamePieceK =killer.notationName;
   let coordinatesPieceK= killer.coordinates;
   /*el mateix per a la peça a capturar*/
@@ -341,7 +351,7 @@ function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
   if (index !== -1) {
     let element = gameState.piecesAlive[index];
     gameState.piecesDead.push(element);
-    gameState.piecesAlive.splice(index);
+    gameState.piecesAlive.splice(index,1);
     let coordinates0 = copyPieceKiller.id.split("_")[1];
     refreshPositionPiecesAlive(coordinates0, coordinates);
   }
