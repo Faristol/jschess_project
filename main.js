@@ -142,14 +142,10 @@ function captureAction(e) {
       /*ha elegit una peça que correspon en color al torn*/
       /*guardem el e.target al movementTarget*/
 
-
       /*IMPORTANTISSIM, ACI PREVIAMENT A CLAVAR AL TARGET DINS O NO, HAUREM DE VEURE
       SI EL SEU REI ESTÀ EN JAKE, SI HO ESTÀ NO ES GUARDARÀ EL EVENT EN L'ARRAY, FINS QUE NO CLICKE
       SOBRE EL REI.
       */
-
-
-
 
       movementTarget.push(element);
     }
@@ -170,20 +166,16 @@ function captureAction(e) {
         //TO DO
         fer una funcio isMovementValid() per a cada peça
         */
-      
-      
+
       movementTarget.push(element);
-     
 
       const movementStarts = movementTarget[0].cloneNode(true);
       const movementEnds = movementTarget[1].cloneNode(true);
       let start = movementStarts.id.split("_")[1];
       let end = movementEnds.id;
-      let pieceType = movementStarts.id.split("_")[0].slice(0,-5) ;
+      let pieceType = movementStarts.id.split("_")[0].slice(0, -5);
 
-     
-      
-      isMovementValidHandler(start,end,pieceType);
+      isMovementValidHandler(start, end, pieceType);
       movePiece(movementTarget);
       movementTarget = [];
       changeTurn();
@@ -223,8 +215,7 @@ function captureAction(e) {
 function game() {
   /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
   /*si arriba ací el joc encara esta en start, però falta 1 moviment x a fer la copia*/
-  if(!gameState.start){
-
+  if (!gameState.start) {
   }
 }
 function enableDisableMovementPlayerColor(colorEnableMove, colorDisableMove) {
@@ -364,140 +355,161 @@ function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
     refreshPositionPiecesAlive(coordinates0, coordinates);
   }
 }
-function isMovementValidHandler(start,end,pieceType){
-  const pieceObject = getPieceObject(start,pieceType);
+function isMovementValidHandler(start, end, pieceType) {
+  const pieceObject = getPieceObject(start, pieceType);
   /*cridar a funcio booleana per veure si hi han peces en mig*/
-  const hasPieces = havingPiecesInBetween(start,end);
+  const hasPieces = havingPiecesInBetween(start, end);
 
-  const valid = pieceObject.valid(start,end,hasPieces);
-
-
+  const valid = pieceObject.valid(start, end, hasPieces);
 }
-function getPieceObject(start,pieceType){
+function getPieceObject(start, pieceType) {
   let pieceObject = gameState.piecesAlive.find(
     (piece) => piece.coordinates === start && piece.type === piece
   );
   return pieceObject;
 }
-function hasPieces(start,end){
+function hasPieces(start, end) {
   /*primer veure si es un moviment horizontal, vertical, diagonal, o, és una L (cavall)*/
   /*HORIZONTAL->  numero constant varia lletra*/
   /*VERTICAL ->  numero variable lletra constant*/
   const startLetterNumber = start.split("");
   const endLetterNumber = end.split("");
-  if(startLetterNumber[0]===endLetterNumber[0]){
-    /*VERTICAL*/
-    if(parseInt(startLetterNumber[1])<endLetterNumber[1]){
-      /*Moviment vertical ascendent*/
+
+  if (startLetterNumber[0] === endLetterNumber[0]) {
+    //vertical
+    if (parseInt(startLetterNumber[1]) < endLetterNumber[1]) {
+       /*Moviment vertical ascendent*/
       /*ara obtinguem el rang de valors que hi ha del numero menut al gran*/
       /*despres recorreguent l'array de peces vives vegem si hi ha alguna que coincideix amb la posicio*/
-      let range = range(startLetterNumber[1],endLetterNumber[1],startLetterNumber[0]);
-      let index = gameState.piecesAlive.findIndex(
-        (piece) => (range.includes(piece.coordinates))
+      let range = range(
+        startLetterNumber[1],
+        endLetterNumber[1],
+        startLetterNumber[0]
       );
-      if(index===-1){
-        /*no hi ha cap peça que impedixca la trajectoria*/
-        return false;
-      }else{
-        return true;
-      }
-
-    }else{
+      return isPathBlocked(range);
+    } else {
       /*Moviment vertical descendent*/
-      let range = range(endLetterNumber[1],startLetterNumber[1],startLetterNumber[0]);
-      let index = gameState.piecesAlive.findIndex(
-        (piece) => (range.includes(piece.coordinates))
+      let range = range(
+        endLetterNumber[1],
+        startLetterNumber[1],
+        startLetterNumber[0]
       );
-      if(index===-1){
-        /*no hi ha cap peça que impedixca la trajectoria*/
-        return false;
-      }else{
-        return true;
-      }
+      return isPathBlocked(range);
     }
-    /*ARA L'HORIZONTAL sera horizontal si el num es constant*/ 
-    }else if(startLetterNumber[1]===endLetterNumber[1]){
-      if(startLetterNumber[0]<endLetterNumber[0]){
-        /*DESPLAÇAMENT HORITZONTAL D'ESQUERRA A DRETA*/
-        let rangeLetter = rangeLetter(startLetterNumber[0],endLetterNumber[0],startLetterNumber[1]);
-        let index = gameState.piecesAlive.findIndex(
-          (piece) => (rangeLetter.includes(piece.coordinates))
-        );
-        if(index===-1){
-          /*no hi ha cap peça que impedixca la trajectoria*/
-          return false;
-        }else{
-          return true;
-        }
+  } else if (startLetterNumber[1] === endLetterNumber[1]) {
+     /*ARA L'HORIZONTAL sera horizontal si el num es constant*/ 
+    if (startLetterNumber[0] < endLetterNumber[0]) {
+      /*DESPLAÇAMENT HORITZONTAL D'ESQUERRA A DRETA*/
+      let rangeLetter = rangeLetter(
+        startLetterNumber[0],
+        endLetterNumber[0],
+        startLetterNumber[1]
+      );
+      return isPathBlocked(rangeLetter);
+    } else {
+      /*DESPLAÇAMENT HORITZONTAL DE DRETA A ESQUERRA*/
+      let rangeLetter = rangeLetter(
+        endLetterNumber[0],
+        startLetterNumber[0],
+        startLetterNumber[1]
+      );
+      return isPathBlocked(rangeLetter);
+    } 
+  } else {
+    /*diagonal*/
+    /*primer calculem la diferencia entre lletres i num, si son iguals es diagonal*/
+    const startLetter = startLetterNumber[0].charCodeAt(0);
+    const endLetter = endLetterNumber[0].charCodeAt(0);
+    const startNumber = parseInt(startLetterNumber[1]);
+    const endNumber = parseInt(endLetterNumber[1]);
+    /*dona igual si restem 0-f o f-0,sempre i quan apliquem el mateix criteri de resta a lletres i nums*/
 
+    const letterDifference = Math.abs(startLetter - endLetter);
+    const numDifference = Math.abs(startNumber - endNumber);
 
-      }else{
-        /*DESPLAÇAMENT HORITZONTAL DE DRETA A ESQUERRA*/
-        let rangeLetter = rangeLetter(endLetterNumber[0],startLetterNumber[0],startLetterNumber[1]);
-        let index = gameState.piecesAlive.findIndex(
-          (piece) => (rangeLetter.includes(piece.coordinates))
-        );
-        if(index===-1){
-          /*no hi ha cap peça que impedixca la trajectoria*/
-          return false;
-        }else{
-          return true;
-        }
-
-      }
-      
-/*ara vorem el diagonal*/
-    }else {
-      /*primer calculem la diferencia entre lletres i num, si son iguals es diagonal*/
-      const startLetter = startLetterNumber[0].charCodeAt(0);
-      const endLetter = endLetterNumber[0].charCodeAt(0);
-      const startNumber = parseInt(startLetterNumber[0]);
-      const endNumber = parseInt(endLetterNumber[0]);
-/*dona igual si restem 0-f o f-0,sempre i quan apliquem el mateix criteri de resta a lletres i nums*/
-      const letterDifference = startLetter-endLetter;
-      const numDifference = startNumber-endNumber;
-      if(letterDifference===numDifference){
-        /*es diagonal*/
+    if (letterDifference === numDifference) {
+      /*es diagonal*/
         /*després vegem la direccio i recorreguem els elements*/
         /*si la lletra d'inici és menor que la final, va d'esquerra a dreta*/
         /*1 esquerra-dreta, -1 dreta-esquerra*/
-        const directionX = startLetter<endLetter?1:-1;
-        /*1 ascendent*/
-        const directionY = startNumber<endNumber?1:-1;
-        /*4 casos
+      const directionX = startLetter < endLetter ? 1 : -1;
+       /*1 ascendent*/
+      const directionY = startNumber < endNumber ? 1 : -1;
+       /*4 casos
         ->Dalt-baix(num sempre baixen) -> d'esquerra a dreta -> ordre alfabètic lletres ++
                                        -> dreta a esquerra   -> lletres --
         ->Baix-dalt (num sempre pugen) -> d'esquerra a dreta -> alfabètic
                                       -> dreta a esquerra    -> lletres --
         */
-      }else{
+
+      if (directionY === 1) {
+        if (directionX === 1) {
+          let rangeLetterAscendent = rangeDiagonalLetter(startLetter, endLetter);
+          ++startNumber;
+          let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
+            (letter, index) => letter + (startNumber + index)
+          );
+          return isPathBlocked(rangeLetterNumberDiagonal);
+        } else {
+          let rangeLetterAscendent = rangeDiagonalLetter(endLetter, startLetter);
+          --endNumber;
+          let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
+            (letter, index) => letter + (endNumber - index)
+          );
+          return isPathBlocked(rangeLetterNumberDiagonal);
+        }
+      } else {
+        let rangeLetterDescendent = rangeDiagonalLetter(endLetter, startLetter);
+        if (directionX === 1) {
+          let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
+            (letter, index) => letter + (endNumber - index)
+          );
+          return isPathBlocked(rangeLetterNumberDiagonal);
+        } else {
+          let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
+            (letter, index) => letter + (endNumber - index)
+          );
+          return isPathBlocked(rangeLetterNumberDiagonal);
+        }
+      }
+    } else {
         /*no ho és, a efectes pràctics retornarem false->
         en cada peça aplicarem la seua lògica de moviment
         aleshores, no passa res, si un peo (p.ex.) arriba aci doncs, en la seua lògica interna
         sabrem que es un moviment invàlid
         */
-        return false;
-      }
-      
-
+      return false;
     }
-
-
+  }
 }
-function range(min,max,letter){
+
+function isPathBlocked(range) {
+  let index = gameState.piecesAlive.findIndex((piece) => range.includes(piece.coordinates));
+  return index !== -1;
+}
+
+function range(min, max, letter) {
   let range = [];
-  /*rang sense incloure els extrems*/
-  for(let i=min+1;i<max;i++){
-    range.push(letter+i);
+  for (let i = min + 1; i < max; i++) {
+    range.push(letter + i);
   }
   return range;
 }
-function rangeLetter(start,end,num){
+
+function rangeLetter(start, end, num) {
   let rangeLetter = [];
   const startLetter = start.charCodeAt(0);
   const endLetter = end.charCodeAt(0);
-  for(let i=startLetter+1;i<endLetter;i++){
-    rangeLetter.push(String.fromCharCode(i)+num);
+  for (let i = startLetter + 1; i < endLetter; i++) {
+    rangeLetter.push(String.fromCharCode(i) + num);
+  }
+  return rangeLetter;
+}
+
+function rangeDiagonalLetter(startLetter, endLetter) {
+  let rangeLetter = [];
+  for (let i = startLetter + 1; i < endLetter; i++) {
+    rangeLetter.push(String.fromCharCode(i));
   }
   return rangeLetter;
 }
