@@ -415,15 +415,89 @@ function hasPieces(start,end){
         return true;
       }
     }
+    /*ARA L'HORIZONTAL sera horizontal si el num es constant*/ 
+    }else if(startLetterNumber[1]===endLetterNumber[1]){
+      if(startLetterNumber[0]<endLetterNumber[0]){
+        /*DESPLAÇAMENT HORITZONTAL D'ESQUERRA A DRETA*/
+        let rangeLetter = rangeLetter(startLetterNumber[0],endLetterNumber[0],startLetterNumber[1]);
+        let index = gameState.piecesAlive.findIndex(
+          (piece) => (rangeLetter.includes(piece.coordinates))
+        );
+        if(index===-1){
+          /*no hi ha cap peça que impedixca la trajectoria*/
+          return false;
+        }else{
+          return true;
+        }
+
+
+      }else{
+        /*DESPLAÇAMENT HORITZONTAL DE DRETA A ESQUERRA*/
+        let rangeLetter = rangeLetter(endLetterNumber[0],startLetterNumber[0],startLetterNumber[1]);
+        let index = gameState.piecesAlive.findIndex(
+          (piece) => (rangeLetter.includes(piece.coordinates))
+        );
+        if(index===-1){
+          /*no hi ha cap peça que impedixca la trajectoria*/
+          return false;
+        }else{
+          return true;
+        }
+
+      }
+      
+/*ara vorem el diagonal*/
+    }else {
+      /*primer calculem la diferencia entre lletres i num, si son iguals es diagonal*/
+      const startLetter = startLetterNumber[0].charCodeAt(0);
+      const endLetter = endLetterNumber[0].charCodeAt(0);
+      const startNumber = parseInt(startLetterNumber[0]);
+      const endNumber = parseInt(endLetterNumber[0]);
+/*dona igual si restem 0-f o f-0,sempre i quan apliquem el mateix criteri de resta a lletres i nums*/
+      const letterDifference = startLetter-endLetter;
+      const numDifference = startNumber-endNumber;
+      if(letterDifference===numDifference){
+        /*es diagonal*/
+        /*després vegem la direccio i recorreguem els elements*/
+        /*si la lletra d'inici és menor que la final, va d'esquerra a dreta*/
+        /*1 esquerra-dreta, -1 dreta-esquerra*/
+        const directionX = startLetter<endLetter?1:-1;
+        /*1 ascendent*/
+        const directionY = startNumber<endNumber?1:-1;
+        /*4 casos
+        ->Dalt-baix(num sempre baixen) -> d'esquerra a dreta -> ordre alfabètic lletres ++
+                                       -> dreta a esquerra   -> lletres --
+        ->Baix-dalt (num sempre pugen) -> d'esquerra a dreta -> alfabètic
+                                      -> dreta a esquerra    -> lletres --
+        */
+      }else{
+        /*no ho és, a efectes pràctics retornarem false->
+        en cada peça aplicarem la seua lògica de moviment
+        aleshores, no passa res, si un peo (p.ex.) arriba aci doncs, en la seua lògica interna
+        sabrem que es un moviment invàlid
+        */
+        return false;
+      }
+      
+
     }
 
 
 }
 function range(min,max,letter){
-  var range = [];
+  let range = [];
   /*rang sense incloure els extrems*/
   for(let i=min+1;i<max;i++){
     range.push(letter+i);
   }
   return range;
+}
+function rangeLetter(start,end,num){
+  let rangeLetter = [];
+  const startLetter = start.charCodeAt(0);
+  const endLetter = end.charCodeAt(0);
+  for(let i=startLetter+1;i<endLetter;i++){
+    rangeLetter.push(String.fromCharCode(i)+num);
+  }
+  return rangeLetter;
 }
