@@ -177,6 +177,15 @@ function captureAction(e) {
       let start = movementStarts.id.split("_")[1];
       let end = movementEnds.id;
       let pieceType = movementStarts.id.split("_")[0].slice(0, -5);
+      /*ESQUEMA VALIDACIO
+      1)El seu rey està en jaque?
+        1.1)Sí->la peça elegida és el rey -> okey -> el moviment resultant evita el jaque?
+            Sí-> la peça elegida no és el rey-> el moviment resultant evita el jaque?
+        
+      
+      
+      
+      */
 
       isMovementValidHandler(start, end, pieceType);
       movePiece(movementTarget);
@@ -292,10 +301,8 @@ function killPiece(movementTarget) {
 function isMovementValidHandler(start, end, pieceType) {
   const pieceObject = getPieceObject(start, pieceType);
   /*cridar a funcio booleana per veure si hi han peces en mig*/
-  const pieces = hasPieces(start, end);
-
-
-  //const valid = pieceObject.valid(start, end, hasPieces);
+  const hasPiecesBetween = hasPieces(start, end);
+  const valid = pieceObject.valid(start, end, hasPieces);
 }
 
 
