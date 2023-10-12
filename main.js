@@ -187,10 +187,13 @@ function captureAction(e) {
       
       */
 
-      isMovementValidHandler(start, end, pieceType);
-      movePiece(movementTarget);
+      if(isMovementValidHandler(start, end, pieceType)){
+        movePiece(movementTarget);
+        changeTurn();
+      };
+      
       movementTarget = [];
-      changeTurn();
+      
     } else if (
       element.textContent.length !== 0 &&
       movementTarget.length === 1
@@ -302,7 +305,7 @@ function isMovementValidHandler(start, end, pieceType) {
   const pieceObject = getPieceObject(start, pieceType);
   /*cridar a funcio booleana per veure si hi han peces en mig*/
   const hasPiecesBetween = hasPieces(start, end);
-  const valid = pieceObject.valid(start, end, hasPieces);
+  return pieceObject.valid(start, end, hasPiecesBetween);
 }
 
 

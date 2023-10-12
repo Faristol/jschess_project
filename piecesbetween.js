@@ -2,7 +2,7 @@ export {getPieceObject,range,rangeLetter,rangeDiagonalLetter,isPathBlocked,hasPi
 import { gameState } from "./main.js";
 function getPieceObject(start, pieceType) {
     let pieceObject = gameState.piecesAlive.find(
-      (piece) => piece.coordinates === start && piece.type === piece
+      (piece) => piece.coordinates === start && piece.type === pieceType
     );
     return pieceObject;
   }
@@ -29,13 +29,14 @@ function getPieceObject(start, pieceType) {
     return rangeLetter;
   }
   
-  function rangeDiagonalLetter(startLetter, endLetter) {
+  function rangeDiagonalLetter(start, end) {
     let rangeLetter = [];
-    for (let i = startLetter + 1; i < endLetter; i++) {
+    for (let i = start + 1; i < end; i++) {
       rangeLetter.push(String.fromCharCode(i));
     }
     return rangeLetter;
   }
+  
  function hasPieces(start, end) {
     /*primer veure si es un moviment horizontal, vertical, diagonal, o, és una L (cavall)*/
     /*HORIZONTAL->  numero constant varia lletra*/
@@ -125,6 +126,7 @@ function getPieceObject(start, pieceType) {
             let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
               (letter, index) => letter + (startNumber + index)
             );
+            console.log(rangeLetterNumberDiagonal);
             return isPathBlocked(rangeLetterNumberDiagonal);
           } else {
             //console.log("moviment diagonal ascendent dreta-esquerra-");
@@ -133,21 +135,28 @@ function getPieceObject(start, pieceType) {
             let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
               (letter, index) => letter + (endNumber - index)
             );
+            console.log(rangeLetterNumberDiagonal);
             return isPathBlocked(rangeLetterNumberDiagonal);
           }
         } else {
-          let rangeLetterDescendent = rangeDiagonalLetter(endLetter, startLetter);
+          let rangeLetterDescendent;
           if (directionX === 1) {
+           rangeLetterDescendent = rangeDiagonalLetter(startLetter,endLetter);
             //console.log("moviment diagonal descendent esquerra-dreta");
+            --startNumber;
             let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
-              (letter, index) => letter + (endNumber - index)
+              (letter, index) => letter + (startNumber-index)
             );
+            console.log(rangeLetterNumberDiagonal);
             return isPathBlocked(rangeLetterNumberDiagonal);
           } else {
+            rangeLetterDescendent = rangeDiagonalLetter(endLetter,startLetter);
             //console.log("moviment diagonal descendent dretaesquerra-");
+            ++endNumber;
             let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
-              (letter, index) => letter + (endNumber - index)
+              (letter, index) => letter + (endNumber + index)
             );
+            console.log(rangeLetterNumberDiagonal);
             return isPathBlocked(rangeLetterNumberDiagonal);
           }
         }
