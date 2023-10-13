@@ -16,6 +16,8 @@ class Bishop extends PieceFather {
 
   valid(start, end, hasPieces) {
     if (!hasPieces) {
+      
+
       return (
         isDiagonalAscendent(start, end) || isDiagonalDescendent(start, end)
       );

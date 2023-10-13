@@ -135,6 +135,8 @@ function createTablePieces() {
       chessBoard.appendChild(square);
     }
   }
+ 
+
   gameState.start = true;
 }
 /*El joc començarà quan el jugador de les blanques faça un moviment valid, açò comporta
@@ -240,7 +242,8 @@ function captureAction(e) {
         let start = movementStarts.id.split("_")[1];
         let end = movementEnds.id;
         let pieceTypeKiller = movementStarts.id.split("_")[0].slice(0, -5);
-        let pieceTypeToKill = movementStarts.id.split("_")[0].slice(0, -5);
+        let pieceTypeToKill = movementEnds.id.split("_")[0].slice(0, -5);
+
 
         if (
           isMovementValidHandler(start, end, pieceTypeKiller, pieceTypeToKill)
@@ -311,14 +314,15 @@ function killPiece(movementTarget) {
   let idPieceToKill = copyPieceToKill.id;
 
   /*canviem el id de la pieceKiller pel seu sense el nom*/
-  pieceKiller.id = copyPieceKiller.id.substring(copyPieceKiller.length - 2);
+  pieceKiller.id = idPieceKiller.substring(idPieceKiller.length - 2);
   pieceKiller.textContent = "";
 
   pieceToKill.id =
-    copyPieceKiller.id.split("_")[0] +
+    idPieceKiller.split("_")[0] +
     "_" +
-    copyPieceToKill.id.substring(copyPieceToKill.id.length - 2);
+    idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
+
 
   refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill);
   refreshPiecesDead(copyPieceToKill, copyPieceKiller);
@@ -334,6 +338,7 @@ function isMovementValidHandler(start, end, pieceType, pieceType2) {
     const pieceObject = getPieceObject(start, pieceType);
     /*cridar a funcio booleana per veure si hi han peces en mig*/
     const hasPiecesBetween = hasPieces(start, end);
+    
     return pieceObject.valid(start, end, hasPiecesBetween);
   } else {
     /*si pieceType2 esta definidia-> implica que hi ha un intent de captura
@@ -345,6 +350,7 @@ function isMovementValidHandler(start, end, pieceType, pieceType2) {
     } else {
       const pieceObject = getPieceObject(start, pieceType);
       const hasPiecesBetween = hasPieces(start, end.split("_")[1]);
+      
       if (pieceObject.type === "pawn") {
         return pieceObject.valid(
           start,

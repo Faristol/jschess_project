@@ -20,9 +20,10 @@ class King extends PieceFather {
       let endLetter = end.split("")[0];
       let endNumber = parseInt(end.split("")[1]);
       let numDifference = Math.abs(startNumber - endNumber);
+      let letterDifference = Math.abs(startLetter.charCodeAt(0)-endLetter.charCodeAt(0));
       /*en quest cas no cal aplicar cap funcio, doncs el rey es pot moure en totes les direccions
           pero sols d'1 en 1*/
-      if (numDifference === 1) {
+      if (numDifference === 1||letterDifference===1) {
         return true;
       } else {
         return false;

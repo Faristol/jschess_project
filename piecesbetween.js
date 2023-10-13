@@ -135,7 +135,6 @@ function hasPieces(start, end) {
           let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
             (letter, index) => letter + (startNumber + index)
           );
-          console.log(rangeLetterNumberDiagonal);
           return isPathBlocked(rangeLetterNumberDiagonal);
         } else {
           //console.log("moviment diagonal ascendent dreta-esquerra-");
