@@ -5,9 +5,23 @@ import { Pawn } from "./piecesobjects/pawn.js";
 import { Queen } from "./piecesobjects/queen.js";
 import { Rook } from "./piecesobjects/rook.js";
 import { PieceFather } from "./piecesobjects/piecefather.js";
-import {refreshMovementWhiteBlackOnlyMove,refreshMovementWhiteBlackKill,findAndPushPieceToMoveWhiteBlack,findAndPushPieceToKillWhiteBlack,refreshPiecesDead,refreshPositionPiecesAlive} from "./refresharrays.js";
-import {getPieceObject,isPathBlocked,range,rangeLetter,rangeDiagonalLetter,hasPieces} from "./piecesbetween.js";
-export {gameState};
+import {
+  refreshMovementWhiteBlackOnlyMove,
+  refreshMovementWhiteBlackKill,
+  findAndPushPieceToMoveWhiteBlack,
+  findAndPushPieceToKillWhiteBlack,
+  refreshPiecesDead,
+  refreshPositionPiecesAlive,
+} from "./refresharrays.js";
+import {
+  getPieceObject,
+  isPathBlocked,
+  range,
+  rangeLetter,
+  rangeDiagonalLetter,
+  hasPieces,
+} from "./piecesbetween.js";
+export { gameState };
 
 let movementTarget = [];
 let gameState = {
@@ -187,13 +201,12 @@ function captureAction(e) {
       
       */
 
-      if(isMovementValidHandler(start, end, pieceType)){
+      if (isMovementValidHandler(start, end, pieceType)) {
         movePiece(movementTarget);
         changeTurn();
-      };
-      
+      }
+
       movementTarget = [];
-      
     } else if (
       element.textContent.length !== 0 &&
       movementTarget.length === 1
@@ -218,10 +231,24 @@ function captureAction(e) {
         movementTarget = [];
       } else if (!movementTarget[1].id.includes(gameState.turn)) {
         /*peça de color opost*/
+        /*ací haurem de posar unes condicions especials, 
+        cap peça pot matar al rei
+        els peons maten en diagonal
+        */
+        const movementStarts = movementTarget[0].cloneNode(true);
+        const movementEnds = movementTarget[1].cloneNode(true);
+        let start = movementStarts.id.split("_")[1];
+        let end = movementEnds.id;
+        let pieceTypeKiller = movementStarts.id.split("_")[0].slice(0, -5);
+        let pieceTypeToKill = movementStarts.id.split("_")[0].slice(0, -5);
 
-        killPiece(movementTarget);
+        if (
+          isMovementValidHandler(start, end, pieceTypeKiller, pieceTypeToKill)
+        ) {
+          killPiece(movementTarget);
+          changeTurn();
+        }
         movementTarget = [];
-        changeTurn();
       }
     }
   }
@@ -278,19 +305,19 @@ function killPiece(movementTarget) {
   const copyPieceKiller = pieceKiller.cloneNode(true);
   const copyPieceToKill = pieceToKill.cloneNode(true);
 
-  let idPieceKiller = pieceKiller.id;
-  let unicodePieceKiller = pieceKiller.textContent;
+  let idPieceKiller = copyPieceKiller.id;
+  let unicodePieceKiller = copyPieceKiller.textContent;
 
-  let idPieceToKill = pieceToKill.id;
+  let idPieceToKill = copyPieceToKill.id;
 
   /*canviem el id de la pieceKiller pel seu sense el nom*/
-  pieceKiller.id = idPieceKiller.substring(idPieceKiller.length - 2);
+  pieceKiller.id = copyPieceKiller.id.substring(copyPieceKiller.length - 2);
   pieceKiller.textContent = "";
 
   pieceToKill.id =
-    idPieceKiller.split("_")[0] +
+    copyPieceKiller.id.split("_")[0] +
     "_" +
-    idPieceToKill.substring(idPieceToKill.length - 2);
+    copyPieceToKill.id.substring(copyPieceToKill.id.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
 
   refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill);
@@ -301,12 +328,33 @@ function killPiece(movementTarget) {
 }
 
 /*pieces between*/
-function isMovementValidHandler(start, end, pieceType) {
-  const pieceObject = getPieceObject(start, pieceType);
-  /*cridar a funcio booleana per veure si hi han peces en mig*/
-  const hasPiecesBetween = hasPieces(start, end);
-  return pieceObject.valid(start, end, hasPiecesBetween);
+function isMovementValidHandler(start, end, pieceType, pieceType2) {
+  if (pieceType2 === undefined) {
+    /*si esta undefined es un moviment sense captura*/
+    const pieceObject = getPieceObject(start, pieceType);
+    /*cridar a funcio booleana per veure si hi han peces en mig*/
+    const hasPiecesBetween = hasPieces(start, end);
+    return pieceObject.valid(start, end, hasPiecesBetween);
+  } else {
+    /*si pieceType2 esta definidia-> implica que hi ha un intent de captura
+    CONTROLAR->que la peça a capturar no siga un rei, doncs no es pot capturar
+    -> si la peça q captura es un peo, aquest mourà en diagonal
+    */
+    if (pieceType2 === "king") {
+      return false;
+    } else {
+      const pieceObject = getPieceObject(start, pieceType);
+      const hasPiecesBetween = hasPieces(start, end.split("_")[1]);
+      if (pieceObject.type === "pawn") {
+        return pieceObject.valid(
+          start,
+          end.split("_")[1],
+          hasPiecesBetween,
+          true
+        );
+      } else {
+        return pieceObject.valid(start, end.split("_")[1], hasPiecesBetween);
+      }
+    }
+  }
 }
-
-
-
