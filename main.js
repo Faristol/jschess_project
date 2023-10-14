@@ -22,6 +22,7 @@ import {
   hasPieces,
 } from "./piecesbetween.js";
 import { isKingCheck } from "./checkdetection.js";
+import { playRandomAttackSound } from "./memessounds.js";
 export { gameState };
 
 let movementTarget = [];
@@ -304,6 +305,7 @@ function captureAction(e) {
           killPieceWithoutRefreshHtml(movementTarget);
           if(!isKingCheck(gameState.turn)){
             pastContentArrays();
+            playRandomAttackSound();
             killPiece(movementTarget);
             changeTurn();
           }else{
