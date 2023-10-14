@@ -13,6 +13,15 @@ class Queen extends PieceFather {
     super(color, coordinates, "queen");
     this.notationName = "Q";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
   valid(start, end, hasPieces) {
     if (!hasPieces) {
       return (

@@ -13,6 +13,15 @@ class Pawn extends PieceFather {
     super(color, coordinates, "pawn");
     this.notationName = "";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
   valid(start, end, hasPieces, capture) {
     if (!hasPieces) {
       let startLetter = start.split("")[0];

@@ -13,6 +13,15 @@ class King extends PieceFather {
     super(color, coordinates, "king");
     this.notationName = "K";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
   valid(start, end, hasPieces) {
     if (!hasPieces) {
       let startLetter = start.split("")[0];

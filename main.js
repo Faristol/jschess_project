@@ -21,6 +21,7 @@ import {
   rangeDiagonalLetter,
   hasPieces,
 } from "./piecesbetween.js";
+import { isKingCheck } from "./checkdetection.js";
 export { gameState };
 
 let movementTarget = [];
@@ -213,6 +214,7 @@ function captureAction(e) {
 
      
      */
+     gameState.piecesAlive.forEach((piece)=>console.log(piece));
 
       if (isMovementValidHandler(start, end, pieceType)) {
         copyArrays();
@@ -236,9 +238,24 @@ function captureAction(e) {
   ->No ho està apliquem el movePiece i el KillPiece normals (actualitzant el html i els arrays), i canviem de torn
   -> Està en jaque->
   */
-        movePiece(movementTarget);
+ //previament em fet una copia dels arrays-> apliquem aquesta funcio, aquesta funcio modificara als que no son copies
+ //després verifiquem si el seu rei esta en jaque, sino ho està
+ //-> retornem els arrays als valors inicials i efectuem el moviment i canviem el torn
+ //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
+        movePieceWithoutRefreshHtml(movementTarget);
         
-        changeTurn();
+        if(!isKingCheck(gameState.turn)){
+          //si el rei no esta en jaque
+          //carreguem els arrays originals sense modificar i efectuem el moviment
+          pastContentArrays();
+          movePiece(movementTarget);
+          changeTurn();
+
+        }else{
+          pastContentArrays();
+        }
+        
+        
       }
 
       movementTarget = [];
@@ -281,8 +298,26 @@ function captureAction(e) {
         if (
           isMovementValidHandler(start, end, pieceTypeKiller, pieceTypeToKill)
         ) {
-          killPiece(movementTarget);
-          changeTurn();
+          console.log("Pieces alive abans de copiar: ");
+          gameState.piecesAlive.forEach((piece)=>console.log(piece));
+          copyArrays();
+          console.log("Pieces alive desrpés de copiar: ");
+          gameState.piecesAlive.forEach((piece)=>console.log(piece));
+          killPieceWithoutRefreshHtml(movementTarget);
+          console.log("Pieces alive desrpés d'aplicar el killpiecewithout': ");
+          gameState.piecesAlive.forEach((piece)=>console.log(piece));
+          if(!isKingCheck(gameState.turn)){
+            pastContentArrays();
+            console.log("Pieces alive una vegada tornat a l'original: ");
+            gameState.piecesAlive.forEach((piece)=>console.log(piece));
+            killPiece(movementTarget);
+            console.log("Pieces alive final: ");
+            gameState.piecesAlive.forEach((piece)=>console.log(piece));
+            changeTurn();
+          }else{
+            pastContentArrays();
+          }
+          
         }
         movementTarget = [];
       }
@@ -351,6 +386,20 @@ function movePiece(movementTarget) {
    */
   refreshMovementWhiteBlackOnlyMove(destination);
 }
+function killPieceWithoutRefreshHtml(movementTarget){
+  let pieceKiller = movementTarget[0];
+  let pieceToKill = movementTarget[1];
+
+  /*fem copies de de l'element DOM*/
+
+  const copyPieceKiller = pieceKiller.cloneNode(true);
+  const copyPieceToKill = pieceToKill.cloneNode(true);
+
+  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill);
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller);
+
+
+}
 function killPiece(movementTarget) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
@@ -387,7 +436,7 @@ function killPiece(movementTarget) {
 function isMovementValidHandler(start, end, pieceType, pieceType2) {
   if (pieceType2 === undefined) {
     /*si esta undefined es un moviment sense captura*/
-    const pieceObject = getPieceObject(start, pieceType);
+    const pieceObject = getPieceObject(start, pieceType)
     /*cridar a funcio booleana per veure si hi han peces en mig*/
     const hasPiecesBetween = hasPieces(start, end);
     
@@ -416,15 +465,16 @@ function isMovementValidHandler(start, end, pieceType, pieceType2) {
     }
   }
 }
-function copyArrays(){
-  gameState.piecesAliveCopy=[...gameState.piecesAlive];
-  gameState.piecesDeadCopy=[...gameState.piecesDead];
-  gameState.movementRegisterCopy=[...gameState.movementRegister];
-  gameState.movementWhiteBlackCopy=[...gameState.movementWhiteBlack];
+function copyArrays() {
+  gameState.piecesAliveCopy = gameState.piecesAlive.map(piece => piece.clone());
+  gameState.piecesDeadCopy = gameState.piecesDead.map(piece => piece.clone());
+  gameState.movementRegisterCopy = gameState.movementRegister.map(subArr => [...subArr]);
+  gameState.movementWhiteBlackCopy = [...gameState.movementWhiteBlack];
 }
-function pastContentArrays(){
-  gameState.piecesAlive = [...gameState.piecesAliveCopy];
-  gameState.piecesDead = [...gameState.piecesDeadCopy];
-  gameState.movementRegister = [...gameState.movementRegisterCopy];
+
+function pastContentArrays() {
+  gameState.piecesAlive = gameState.piecesAliveCopy.map(piece => piece.clone());
+  gameState.piecesDead = gameState.piecesDeadCopy.map(piece => piece.clone());
+  gameState.movementRegister = gameState.movementRegisterCopy.map(subArr => [...subArr]);
   gameState.movementWhiteBlack = [...gameState.movementWhiteBlackCopy];
 }

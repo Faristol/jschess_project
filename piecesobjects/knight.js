@@ -13,6 +13,15 @@ class Knight extends PieceFather {
     super(color, coordinates, "knight");
     this.notationName = "N";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
   valid(start, end, hasPieces) {
     let startLetter = start.split("")[0].charCodeAt(0);
     let startNumber = parseInt(start.split("")[1]);

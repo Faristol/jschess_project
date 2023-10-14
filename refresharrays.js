@@ -29,7 +29,7 @@ function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill) {
 }
 function findAndPushPieceToMoveWhiteBlack(idPiece) {
   let piece = gameState.piecesAlive.find(
-    (piece) => piece.coordinates === idPiece.id.split("_")[1]
+    (piece) => piece.coordinates === idPiece.id.split("_")[1] || piece.coordinates === idPiece.id
   );
   let notationName = piece.notationName;
   let coordinates = piece.coordinates;
@@ -61,12 +61,13 @@ function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
 function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
   /*actualitzem l'element mogut a la nova coordenada*/
   let index = gameState.piecesAlive.findIndex(
-    (piece) => piece.coordinates == idDestination0
+    (piece) => piece.coordinates === idDestination0
   );
-
   if (index !== -1) gameState.piecesAlive[index].coordinates = idDestinationF;
 }
 function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
+
+
   let coordinates = copyPieceToKill.id.split("_")[1];
   let index = gameState.piecesAlive.findIndex(
     (piece) => piece.coordinates === coordinates

@@ -13,6 +13,15 @@ class Rook extends PieceFather {
     super(color, coordinates, "rook");
     this.notationName = "R";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
   valid(start, end, hasPieces) {
     if (!hasPieces) {
       return (

@@ -13,6 +13,15 @@ class Bishop extends PieceFather {
     super(color, coordinates, "bishop");
     this.notationName = "B";
   }
+  clone() {
+    return new this.constructor(
+      this.color,
+      this.coordinates,
+      this.type,
+      this.unicodePiece,
+      this.notationName
+    );
+  }
 
   valid(start, end, hasPieces) {
     if (!hasPieces) {
