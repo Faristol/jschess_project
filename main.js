@@ -29,9 +29,14 @@ let gameState = {
   /* cada vegada que es faça un moviment white and black, s'afegirà a movment register, en forma d'array*/
   /*periòdicament es farà una comprovació per veure si els 3 ultims elements de l'array son iguals*/
   /*si ho són -> draw by bucle*/
+  movementRegisterCopy: [],
   movementRegister: [],
   movementWhiteBlack: [],
+  movementWhiteBlackCopy:[],
   piecesAlive: [],
+  piecesAliveCopy:[],
+  piecesDead: [],
+  piecesDeadCopy: [],
   start: false,
   /* aci no estaria demés fer varies variables
     relatives a:
@@ -46,7 +51,7 @@ let gameState = {
     white: "pepe",
     black: "paco",
   },
-  piecesDead: [],
+ 
   turn: "white",
   stalemate: "false",
   checkmate: "false",
@@ -202,9 +207,37 @@ function captureAction(e) {
       
       
       */
+     /*Quina es la seqüència de control de jaque?
+     Dona igual que previament tinga el rei en jaque, no cal controlar-ho,
+     s'ha de controlar després del moviment, per veure si el rei esta en jaque, si ho està invalidar moviment
+
+     
+     */
 
       if (isMovementValidHandler(start, end, pieceType)) {
+        copyArrays();
+        /*abans de mourela fem copia de
+        movementRegister: [],
+  movementWhiteBlack: [],
+  piecesAlive: [],
+  piecesDead: [],
+  la moguem, si el seu rei esta amenaçat invalidem moviment
+  aixina cobrim dos casos
+  -> el seu rei previament al moviment estava amenaçat pel jugador contrari, despres del moviment
+  encara ho està, invalidem
+  -> el seu rei previament no estava amenaçat pel jugador contrari, després del moviment ho està
+
+  IMPORTANT-> S'HAURA DE FER altres funcions movePieceWithoutRefreshHtml killPieceWithoutRefreshHtml
+  on sols refresquem els arrays, per a no actualitzar el html
+
+  RECAPITULANT-> verificar si el moviment es valid (a nivell de peça), si ho és
+  fem copia d'arrays, moguem sense actualitzar el html (s'actualitzen els arrays del gameState),
+  verifiquem si el seu rei està en jaque:
+  ->No ho està apliquem el movePiece i el KillPiece normals (actualitzant el html i els arrays), i canviem de torn
+  -> Està en jaque->
+  */
         movePiece(movementTarget);
+        
         changeTurn();
       }
 
@@ -273,6 +306,25 @@ function enableDisableMovementPlayerColor(colorEnableMove, colorDisableMove) {
 function changeTurn() {
   gameState.turn = gameState.turn === "white" ? "black" : "white";
 }
+function movePieceWithoutRefreshHtml(movementTarget){
+  let pieceToMove = movementTarget[0];
+  let destination = movementTarget[1];
+
+  let copyPieceToMove = pieceToMove.cloneNode(true);
+  let copySquareDestination = destination.cloneNode(true);
+
+  let idPieceToMove = copyPieceToMove.id;
+  let idDestination = copySquareDestination.id;
+
+  let idPieceToMoveWhitoutPiece = idPieceToMove.split("_")[1];
+
+  refreshPositionPiecesAlive(idPieceToMoveWhitoutPiece,idDestination);
+  refreshMovementWhiteBlackOnlyMove(copySquareDestination);
+
+
+
+}
+
 function movePiece(movementTarget) {
   /*primer element posicio inicial*/
   let pieceToMove = movementTarget[0];
@@ -363,4 +415,16 @@ function isMovementValidHandler(start, end, pieceType, pieceType2) {
       }
     }
   }
+}
+function copyArrays(){
+  gameState.piecesAliveCopy=[...gameState.piecesAlive];
+  gameState.piecesDeadCopy=[...gameState.piecesDead];
+  gameState.movementRegisterCopy=[...gameState.movementRegister];
+  gameState.movementWhiteBlackCopy=[...gameState.movementWhiteBlack];
+}
+function pastContentArrays(){
+  gameState.piecesAlive = [...gameState.piecesAliveCopy];
+  gameState.piecesDead = [...gameState.piecesDeadCopy];
+  gameState.movementRegister = [...gameState.movementRegisterCopy];
+  gameState.movementWhiteBlack = [...gameState.movementWhiteBlackCopy];
 }
