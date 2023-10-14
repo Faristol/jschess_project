@@ -214,7 +214,7 @@ function captureAction(e) {
 
      
      */
-     gameState.piecesAlive.forEach((piece)=>console.log(piece));
+
 
       if (isMovementValidHandler(start, end, pieceType)) {
         copyArrays();
@@ -250,6 +250,7 @@ function captureAction(e) {
           pastContentArrays();
           movePiece(movementTarget);
           changeTurn();
+
 
         }else{
           pastContentArrays();
@@ -298,21 +299,11 @@ function captureAction(e) {
         if (
           isMovementValidHandler(start, end, pieceTypeKiller, pieceTypeToKill)
         ) {
-          console.log("Pieces alive abans de copiar: ");
-          gameState.piecesAlive.forEach((piece)=>console.log(piece));
           copyArrays();
-          console.log("Pieces alive desrpés de copiar: ");
-          gameState.piecesAlive.forEach((piece)=>console.log(piece));
           killPieceWithoutRefreshHtml(movementTarget);
-          console.log("Pieces alive desrpés d'aplicar el killpiecewithout': ");
-          gameState.piecesAlive.forEach((piece)=>console.log(piece));
           if(!isKingCheck(gameState.turn)){
             pastContentArrays();
-            console.log("Pieces alive una vegada tornat a l'original: ");
-            gameState.piecesAlive.forEach((piece)=>console.log(piece));
             killPiece(movementTarget);
-            console.log("Pieces alive final: ");
-            gameState.piecesAlive.forEach((piece)=>console.log(piece));
             changeTurn();
           }else{
             pastContentArrays();
