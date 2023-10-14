@@ -1,17 +1,6 @@
 import { gameState } from "./main.js";
 export { isKingCheck };
-/*
-->  Idea a partir d'un torn donat-> agafar el contrari, i filtrar les pecesAlive per ixe color
--> aplicar a cada peça la seua lògica de moviment simulant una espècie de raigs X, veure
-en totes les direccions possibles si l'atack es propaga fins:
-->limits del tauler: en aquest cas passarem a comprovar l'altre possible moviment o l'altra peça
--> peça contrincant: si no es el rei passem a comprovar l'altra peça 
--> peça del mateix color -> passem a l'altre moviment o altra peça
 
-
-
-
-*/
 const limits = [
   "`9",
   "a9",
@@ -64,6 +53,7 @@ function isKingCheck(turn) {
   });
   let isChecked = false;
   isChecked = piecesMovementHandler(piecesOpponent, king, isChecked);
+  return isChecked;
 }
 
 function piecesMovementHandler(piecesOpponent, king, isChecked) {
@@ -72,16 +62,16 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
       case "pawn":
         if (piece.color === "white") {
           if (
-            traceDiagonalAscendentLeftToRight(piece.coordinates, 1) ||
-            traceDiagonalAscendentRightToLeft(piece.coordinates, 1)
+            traceDiagonalAscendentLeftToRight(piece.coordinates, 1, king) ||
+            traceDiagonalAscendentRightToLeft(piece.coordinates, 1, king)
           ) {
             isChecked = true;
             break;
           }
         } else {
           if (
-            traceDiagonalDescendentLeftToRight(piece.coordinates, 1) ||
-            traceDiagonalDescendentRightToLeft(piece.coordinates, 1)
+            traceDiagonalDescendentLeftToRight(piece.coordinates, 1, king) ||
+            traceDiagonalDescendentRightToLeft(piece.coordinates, 1, king)
           ) {
             isChecked = true;
             break;
@@ -90,7 +80,7 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
 
         break;
       case "knight":
-        if (tracePositionsKnight(piece.coordinates)) {
+        if (tracePositionsKnight(piece.coordinates, king)) {
           isChecked = true;
           break;
         }
@@ -213,92 +203,150 @@ function traceHorizontalRightToLeft(coordinates) {
   }
   return filterOrderAndGetFirstElement(horizontalRightToLeftRange);
 }
-function traceDiagonalAscendentLeftToRight(coordinates) {
+function traceDiagonalAscendentLeftToRight(coordinates, pawn, king) {
   //el tema del control del jaque amb peons el controlarem a ma i iau
   //lletra ++ num ++
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
   let num = parseInt(position.split("")[1]);
+  if (pawn === undefined) {
+    let diagonalAscendentLeftToRight = [];
 
-  let diagonalAscendentLeftToRight = [];
+    while (!diagonalAscendentLeftToRight.some((xy) => limits.includes(xy))) {
+      //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+      ++letter;
+      ++num;
+      diagonalAscendentLeftToRight.push(String.fromCharCode(letter) + num);
+    }
 
-  while (!diagonalAscendentLeftToRight.some((xy) => limits.includes(xy))) {
-    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
-    ++letter;
-    ++num;
-    diagonalAscendentLeftToRight.push(String.fromCharCode(letter) + num);
+    if (diagonalAscendentLeftToRight.length > 0) {
+      diagonalAscendentLeftToRight.pop();
+    }
+    return filterOrderAndGetFirstElement(diagonalAscendentLeftToRight);
   }
-
-  if (diagonalAscendentLeftToRight.length > 0) {
-    diagonalAscendentLeftToRight.pop();
-  }
-  return filterOrderAndGetFirstElement(diagonalAscendentLeftToRight);
+  ++letter;
+  ++num;
+  let endPosition = String.fromCharCode(letter) + num;
+  return endPosition === king.coordinates;
 }
-function traceDiagonalAscendentRightToLeft(coordinates) {
+function traceDiagonalAscendentRightToLeft(coordinates, pawn, king) {
   //lletra -- num ++
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
   let num = parseInt(position.split("")[1]);
+  if (pawn === undefined) {
+    let diagonalAscendentRightToLeft = [];
 
-  let diagonalAscendentRightToLeft = [];
+    while (!diagonalAscendentRightToLeft.some((xy) => limits.includes(xy))) {
+      //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+      --letter;
+      ++num;
+      diagonalAscendentRightToLeft.push(String.fromCharCode(letter) + num);
+    }
 
-  while (!diagonalAscendentRightToLeft.some((xy) => limits.includes(xy))) {
-    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
-    --letter;
-    ++num;
-    diagonalAscendentRightToLeft.push(String.fromCharCode(letter) + num);
+    if (diagonalAscendentRightToLeft.length > 0) {
+      diagonalAscendentRightToLeft.pop();
+    }
+    return filterOrderAndGetFirstElement(diagonalAscendentRightToLeft);
   }
-
-  if (diagonalAscendentRightToLeft.length > 0) {
-    diagonalAscendentRightToLeft.pop();
-  }
-  return filterOrderAndGetFirstElement(diagonalAscendentRightToLeft);
+  --letter;
+  ++num;
+  let endPosition = String.fromCharCode(letter) + num;
+  return endPosition === king.coordinates;
 }
-function traceDiagonalDescendentLeftToRight(coordinates) {
+function traceDiagonalDescendentLeftToRight(coordinates, pawn, king) {
   //lletra++ num --
-
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
   let num = parseInt(position.split("")[1]);
+  if (pawn === undefined) {
+    let diagonalDescendentLeftToRight = [];
 
-  let diagonalDescendentLeftToRight = [];
+    while (!diagonalDescendentLeftToRight.some((xy) => limits.includes(xy))) {
+      //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+      ++letter;
+      --num;
+      diagonalDescendentLeftToRight.push(String.fromCharCode(letter) + num);
+    }
 
-  while (!diagonalDescendentLeftToRight.some((xy) => limits.includes(xy))) {
-    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
-    ++letter;
-    --num;
-    diagonalDescendentLeftToRight.push(String.fromCharCode(letter) + num);
+    if (diagonalDescendentLeftToRight.length > 0) {
+      diagonalDescendentLeftToRight.pop();
+    }
+    return filterOrderAndGetFirstElement(diagonalDescendentLeftToRight);
   }
-
-  if (diagonalDescendentLeftToRight.length > 0) {
-    diagonalDescendentLeftToRight.pop();
-  }
-  return filterOrderAndGetFirstElement(diagonalDescendentLeftToRight);
+  ++letter;
+  --num;
+  let endPosition = String.fromCharCode(letter) + num;
+  return endPosition === king.coordinates;
 }
-function traceDiagonalDescendentRightToLeft(coordinates) {
+function traceDiagonalDescendentRightToLeft(coordinates, pawn, king) {
   //lletra -- num --
-
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
   let num = parseInt(position.split("")[1]);
+  if (pawn === undefined) {
+    let diagonalDescendentRightToLeft = [];
 
-  let diagonalDescendentRightToLeft = [];
+    while (!diagonalDescendentRightToLeft.some((xy) => limits.includes(xy))) {
+      //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+      --letter;
+      --num;
+      diagonalDescendentRightToLeft.push(String.fromCharCode(letter) + num);
+    }
 
-  while (!diagonalDescendentRightToLeft.some((xy) => limits.includes(xy))) {
-    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
-    --letter;
-    --num;
-    diagonalDescendentRightToLeft.push(String.fromCharCode(letter) + num);
+    if (diagonalDescendentRightToLeft.length > 0) {
+      diagonalDescendentRightToLeft.pop();
+    }
+    return filterOrderAndGetFirstElement(diagonalDescendentRightToLeft);
   }
-
-  if (diagonalDescendentRightToLeft.length > 0) {
-    diagonalDescendentRightToLeft.pop();
-  }
-  return filterOrderAndGetFirstElement(diagonalDescendentRightToLeft);
+  --letter;
+  --num;
+  let endPosition = String.fromCharCode(letter) + num;
+  return endPosition === king.coordinates;
 }
-function tracePositionsKnight(coordinates) {}
+function tracePositionsKnight(coordinates, king) {
+  const coordinatesKing = king.coordinates;
+  let startLetter = coordinates.split("")[0].charCodeAt(0);
+  let startNumber = parseInt(coordinates.split("")[1]);
+  let possibleMovements = [];
+  /*cavall 8 possibles moviments*/
+  /*char +1 num +2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 1) + (startNumber + 2)
+  );
+  /*char +2 num+1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 2) + (startNumber + 1)
+  );
+  /*char +2 num -1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 2) + (startNumber - 1)
+  );
+  /*char +1 num-2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 1) + (startNumber - 2)
+  );
+  /*char -1 num +2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 1) + (startNumber + 2)
+  );
+  /*char -2 num +1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 2) + (startNumber + 1)
+  );
+  /*char -2 num -1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 2) + (startNumber - 1)
+  );
+  /*char -1 num -2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 1) + (startNumber - 2)
+  );
+  //si el rey està posicionat en alguna d'aquestes posicions-> jaque
+  return possibleMovements.includes(coordinatesKing);
+}
 function filterOrderAndGetFirstElement(range) {
-  if (range > 0) {
+  if (range.length > 0) {
     let piecesInRange = gameState.piecesAlive.filter((piece) =>
       range.includes(piece.coordinates)
     );
@@ -312,11 +360,14 @@ function filterOrderAndGetFirstElement(range) {
         }
       }
     }
+    if(piecesInRangeSorted.length>0){
+        return (
+            piecesInRangeSorted[0].type === "king" &&
+            piecesInRangeSorted[0].color === gameState.turn
+          );
+    }
     //ara agafem la primera posicio de l'array de peces ordenat
-    return (
-      piecesInRangeSorted[0].type === "king" &&
-      piecesInRangeSorted[0].color === gameState.turn
-    );
+    
   }
   return false;
 }

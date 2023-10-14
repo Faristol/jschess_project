@@ -253,6 +253,7 @@ function captureAction(e) {
 
 
         }else{
+          console.log("jaqueeee");
           pastContentArrays();
         }
         
@@ -306,6 +307,7 @@ function captureAction(e) {
             killPiece(movementTarget);
             changeTurn();
           }else{
+            console.log("jaqueeee");
             pastContentArrays();
           }
           
