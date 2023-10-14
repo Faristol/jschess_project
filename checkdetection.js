@@ -53,6 +53,11 @@ function isKingCheck(turn) {
   });
   let isChecked = false;
   isChecked = piecesMovementHandler(piecesOpponent, king, isChecked);
+  if(isChecked){
+    const audio = new Audio('./audio/cuidao.mp3');
+    audio.play();
+
+  }
   return isChecked;
 }
 
