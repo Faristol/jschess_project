@@ -442,34 +442,61 @@ function cantStopCheck(CopyPiecesAlive, turn, king) {
     */
   //per a determinar les "hot positions haurem de traçar una vertical una horitzontal, les diagonals, y les posicions dels cavalls"
   const kingPosition = king.coordinates;
-  const hotPositions = traceVerticalAscendentRange(kingPosition)
-    .concat(traceVerticalDescendentRange(kingPosition))
-    .concat(traceHorizontalLeftToRightRange(kingPosition))
-    .concat(traceHorizontalRightToLeftRange(kingPosition))
-    .concat(traceDiagonalAscendentLeftToRightRange(kingPosition))
-    .concat(traceDiagonalAscendentRightToLeftRange(kingPosition))
-    .concat(traceDiagonalDescendentLeftToRightRange(kingPosition))
-    .concat(traceDiagonalDescendentRightToLeftRange(kingPosition))
-    .concat(tracePositionsKnightRange(kingPosition));
-    //ara d'aquesta hot position avaluem en cada trajectoria les peces del color opost 
-    //les primeres que es troben
-    const fristPiecesOppositeColorInHotPositions=[];
-    //idea ESTELAR-> per a veure si em carregar alguna peça crear per a cada peça de fristPiecesOppositeColorInHotPositions=[]
-    //un radi d'atack a l'igual que he fet amb el rei->
-    /*
-    ->si o be en alguna horizontal o vertical, la primera peça es o torre o reina me la carregue
-    ->si en alguna diagonal tinc alguna reina, peo(1mov) o alfil me la carregue
-    ->si tinc algun cavall en radi d'accio i mel puc carregar -> mel carregue
+  let piecesAttacking = [];
+  let verticalAscendentRange = traceVerticalAscendentRange(kingPosition);
+   let verticalDescendentRange = traceVerticalDescendentRange(kingPosition);
+   let horizontalLeftToRightRange = traceHorizontalLeftToRightRange(kingPosition);
+   let horizontalRightToLeftRange = traceHorizontalRightToLeftRange(kingPosition);
+    let diagonalAscendentLeftToRightRange = traceDiagonalAscendentLeftToRightRange(kingPosition);
+    let diagonalAscendentRightToLeftRange = traceDiagonalAscendentRightToLeftRange(kingPosition);
+    let diagonalDescendentLeftToRightRange = traceDiagonalDescendentLeftToRightRange(kingPosition);
+    let diagonalDescendentRightToLeftRange = traceDiagonalDescendentRightToLeftRange(kingPosition);
+    let positionsKnightRange = tracePositionsKnightRange(kingPosition);
+/*ara vegem les branques on realment estan les amenaces*/
+/*la funcio relevantOrIrrelevantBranch el que fara primer de tot es anar recorreguent el array, si la primera peça es del color del torn no representa una amenaça, si la primera es del color opost i no es ni rook ni queen no representa cap amenaça
+si en la branca no hi ha cap peça no representa cap amenaça. En cas de detectar-se una amenaça tornarà la branca des de l'inici fins a la peça incloent-la, ademés s'afegirà ixa peça a les peces que amenacen el rei.
+*/
+verticalAscendentRange = relevantOrIrrelevantBranch(verticalAscendentRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
+verticalDescendentRange =  relevantOrIrrelevantBranch(verticalAscendentRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
+horizontalLeftToRightRange = relevantOrIrrelevantBranch(horizontalLeftToRightRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
+horizontalRightToLeftRange = relevantOrIrrelevantBranch(horizontalRightToLeftRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
+if(turn==='white'){
+  /*el peo amenaçador serà el negre i per tant podrà amenaçar en diagonal descendent*/
+  diagonalAscendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalAscendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalDescendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalDescendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
 
-    per a cada "kill" avaluar l'estat del jaque si deixa d'estar en jaque-> no jaque mate
-
-    després passem a intentar bloquejar, mateix plantejament que en el atack, ara el target no es una peça sino un escac
-    */
-
-
-
-
+}else{
+  /*el torn es black, per tant el pero amenaçador serà el blanc i podrà amenaçar en diagonal ascendent*/
+  diagonalAscendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalAscendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalDescendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
+  diagonalDescendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
+}
+//en el de positions knight, sino hi ha cap cavall en eixes casselles branca fora
+//el tema de les amenaces dels cavalls ho evaluarem independentment doncs aquestos no es poden bloquejar o els mates o res
+positionsKnightRange = relevantOrIrrelevantBranch(positionsKnightRange,['knight'],piecesAttacking,turn);
+}
+function relevantOrIrrelevantBranch(positions,potentialAttackers,piecesAttacking,turn,CopyPiecesAlive){
+  let pieceFind;
+  positions.forEach((position)=>{
+    pieceFind = CopyPiecesAlive.find((piece)=>{
+      return potentialAttackers.includes(piece.type);
+    })
+  })
+  if(!pieceFind){
+    //sino s'ha trobat-> irrellevant
+    return [];
+  }
+  if(pieceFind.color!==turn){
+    //s'ha trobat una peça del
+    piecesAttacking.push(pieceFind);
     
+
+  }
+  return [];
+
 }
 
 function traceVerticalAscendentRange(coordinates) {
