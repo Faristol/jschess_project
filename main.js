@@ -22,6 +22,7 @@ import {
   hasPieces,
 } from "./piecesbetween.js";
 import { isKingCheck } from "./checkdetection.js";
+import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
 export { gameState };
 
@@ -251,10 +252,13 @@ function captureAction(e) {
           pastContentArrays();
           movePiece(movementTarget);
           changeTurn();
+          //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
+          if(isCheckMate(gameState.turn)){
+              
+          }
 
 
         }else{
-          console.log("jaqueeee");
           pastContentArrays();
         }
         
@@ -308,8 +312,11 @@ function captureAction(e) {
             playRandomAttackSound();
             killPiece(movementTarget);
             changeTurn();
+            //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
+            if(isCheckMate(gameState.turn)){
+              
+            }
           }else{
-            console.log("jaqueeee");
             pastContentArrays();
           }
           
