@@ -78,8 +78,8 @@ function createTablePieces() {
     Rook,
     Knight,
     Bishop,
-    King,
     Queen,
+    King,
     Bishop,
     Knight,
     Rook,
@@ -91,16 +91,16 @@ function createTablePieces() {
     /*if i%2==0 true (starts with green) else false (starts with white)*/
     let greenStart = i % 2 === 0;
     for (let j = 0; j < 8; j++) {
-      /*if greenStart = true -> put green when j%2===0
-        -> false: put white when j%2===0
+      /*if greenStart = true -> put white when j%2===0
+        -> false: put greenwhen j%2===0
         */
       let color = greenStart
         ? j % 2 === 0
-          ? "green"
-          : "white"
+          ? "white"
+          : "green"
         : j % 2 === 0
-        ? "white"
-        : "green";
+        ? "green"
+        : "white";
       let column = String.fromCharCode(charCode + j);
       let square = document.createElement("span");
       square.classList.add(color);
