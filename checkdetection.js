@@ -1,7 +1,8 @@
-import { gameState } from "./main.js";
+
 export {
   limits
 };
+export { isKingCheck };
 
 const limits = [
   "`9",
@@ -42,19 +43,19 @@ const limits = [
   "i8",
 ];
 
-function isKingCheck(turn) {
+function isKingCheck(turn,piecesAlive) {
   const colorPiecesOpponent = turn === "white" ? "black" : "white";
-  const king = gameState.piecesAlive.find(
+  const king = piecesAlive.find(
     (piece) => piece.type === "king" && piece.color === turn
   );
   const piecesOpponent = [];
-  gameState.piecesAlive.forEach((piece) => {
+  piecesAlive.forEach((piece) => {
     if (piece.color === colorPiecesOpponent) {
       piecesOpponent.push(piece);
     }
   });
   let isChecked = false;
-  isChecked = piecesMovementHandler(piecesOpponent, king, isChecked);
+  isChecked = piecesMovementHandler(piecesOpponent, king, isChecked,piecesAlive,turn);
   if (isChecked) {
     const audio = new Audio("./audio/cuidao.mp3");
     audio.play();
@@ -62,22 +63,22 @@ function isKingCheck(turn) {
   return isChecked;
 }
 
-function piecesMovementHandler(piecesOpponent, king, isChecked) {
+function piecesMovementHandler(piecesOpponent, king, isChecked,piecesAlive,turn) {
   piecesOpponent.forEach((piece) => {
     switch (piece.type) {
       case "pawn":
         if (piece.color === "white") {
           if (
-            traceDiagonalAscendentLeftToRight(piece.coordinates, 1, king) ||
-            traceDiagonalAscendentRightToLeft(piece.coordinates, 1, king)
+            traceDiagonalAscendentLeftToRight(piece.coordinates, 1, king,piecesAlive,turn) ||
+            traceDiagonalAscendentRightToLeft(piece.coordinates, 1, king,piecesAlive,turn)
           ) {
             isChecked = true;
             break;
           }
         } else {
           if (
-            traceDiagonalDescendentLeftToRight(piece.coordinates, 1, king) ||
-            traceDiagonalDescendentRightToLeft(piece.coordinates, 1, king)
+            traceDiagonalDescendentLeftToRight(piece.coordinates, 1, king,piecesAlive,turn) ||
+            traceDiagonalDescendentRightToLeft(piece.coordinates, 1, king,piecesAlive,turn)
           ) {
             isChecked = true;
             break;
@@ -93,10 +94,10 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
         break;
       case "bishop":
         if (
-          traceDiagonalAscendentLeftToRight(piece.coordinates) ||
-          traceDiagonalAscendentRightToLeft(piece.coordinates) ||
-          traceDiagonalDescendentLeftToRight(piece.coordinates) ||
-          traceDiagonalDescendentRightToLeft(piece.coordinates)
+          traceDiagonalAscendentLeftToRight(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalAscendentRightToLeft(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalDescendentLeftToRight(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalDescendentRightToLeft(piece.coordinates,undefined,undefined,piecesAlive,turn)
         ) {
           isChecked = true;
           break;
@@ -104,14 +105,14 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
         break;
       case "queen":
         if (
-          traceDiagonalAscendentLeftToRight(piece.coordinates) ||
-          traceDiagonalAscendentRightToLeft(piece.coordinates) ||
-          traceDiagonalDescendentLeftToRight(piece.coordinates) ||
-          traceDiagonalDescendentRightToLeft(piece.coordinates) ||
-          traceVerticalAscendent(piece.coordinates) ||
-          traceVerticalDescendent(piece.coordinates) ||
-          traceHorizontalLeftToRight(piece.coordinates) ||
-          traceHorizontalRightToLeft(piece.coordinates)
+          traceDiagonalAscendentLeftToRight(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalAscendentRightToLeft(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalDescendentLeftToRight(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceDiagonalDescendentRightToLeft(piece.coordinates,undefined,undefined,piecesAlive,turn) ||
+          traceVerticalAscendent(piece.coordinates,piecesAlive,turn) ||
+          traceVerticalDescendent(piece.coordinates,piecesAlive,turn) ||
+          traceHorizontalLeftToRight(piece.coordinates,piecesAlive,turn) ||
+          traceHorizontalRightToLeft(piece.coordinates,piecesAlive,turn)
         ) {
           isChecked = true;
           break;
@@ -120,10 +121,10 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
         break;
       case "rook":
         if (
-          traceHorizontalLeftToRight(piece.coordinates) ||
-          traceHorizontalRightToLeft(piece.coordinates) ||
-          traceVerticalAscendent(piece.coordinates) ||
-          traceVerticalDescendent(piece.coordinates)
+          traceHorizontalLeftToRight(piece.coordinates,piecesAlive,turn) ||
+          traceHorizontalRightToLeft(piece.coordinates,piecesAlive,turn) ||
+          traceVerticalAscendent(piece.coordinates,piecesAlive,turn) ||
+          traceVerticalDescendent(piece.coordinates,piecesAlive,turn)
         ) {
           isChecked = true;
           break;
@@ -137,7 +138,7 @@ function piecesMovementHandler(piecesOpponent, king, isChecked) {
 //filtrar els elements per la posicio
 //ordenarlos en funcio de l'ordre del rang
 //agafar el primer objecte-> si es rey -> check
-function traceVerticalAscendent(coordinates) {
+function traceVerticalAscendent(coordinates,piecesAlive,turn) {
   /*lletra constant numero augmenta*/
   let position = coordinates;
   const letter = position.split("")[0];
@@ -153,9 +154,9 @@ function traceVerticalAscendent(coordinates) {
     verticalAscendentRange.pop();
   }
 
-  return filterOrderAndGetFirstElement(verticalAscendentRange);
+  return filterOrderAndGetFirstElement(verticalAscendentRange,piecesAlive,turn);
 }
-function traceVerticalDescendent(coordinates) {
+function traceVerticalDescendent(coordinates,piecesAlive,turn) {
   //letra constant numero disminueix
   let position = coordinates;
   const letter = position.split("")[0];
@@ -171,9 +172,9 @@ function traceVerticalDescendent(coordinates) {
   if (verticalDescendentRange.length > 0) {
     verticalDescendentRange.pop();
   }
-  return filterOrderAndGetFirstElement(verticalDescendentRange);
+  return filterOrderAndGetFirstElement(verticalDescendentRange,piecesAlive,turn);
 }
-function traceHorizontalLeftToRight(coordinates) {
+function traceHorizontalLeftToRight(coordinates,piecesAlive,turn) {
   //num constant lletra augmenta
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -189,9 +190,9 @@ function traceHorizontalLeftToRight(coordinates) {
   if (horizontalLeftToRightRange.length > 0) {
     horizontalLeftToRightRange.pop();
   }
-  return filterOrderAndGetFirstElement(horizontalLeftToRightRange);
+  return filterOrderAndGetFirstElement(horizontalLeftToRightRange,piecesAlive,turn);
 }
-function traceHorizontalRightToLeft(coordinates) {
+function traceHorizontalRightToLeft(coordinates,piecesAlive,turn) {
   //num constant lletra disminueix
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -207,9 +208,9 @@ function traceHorizontalRightToLeft(coordinates) {
   if (horizontalRightToLeftRange.length > 0) {
     horizontalRightToLeftRange.pop();
   }
-  return filterOrderAndGetFirstElement(horizontalRightToLeftRange);
+  return filterOrderAndGetFirstElement(horizontalRightToLeftRange,piecesAlive,turn);
 }
-function traceDiagonalAscendentLeftToRight(coordinates, pawn, king) {
+function traceDiagonalAscendentLeftToRight(coordinates, pawn, king,piecesAlive,turn) {
   //el tema del control del jaque amb peons el controlarem a ma i iau
   //lletra ++ num ++
   let position = coordinates;
@@ -228,14 +229,14 @@ function traceDiagonalAscendentLeftToRight(coordinates, pawn, king) {
     if (diagonalAscendentLeftToRight.length > 0) {
       diagonalAscendentLeftToRight.pop();
     }
-    return filterOrderAndGetFirstElement(diagonalAscendentLeftToRight);
+    return filterOrderAndGetFirstElement(diagonalAscendentLeftToRight,piecesAlive,turn);
   }
   ++letter;
   ++num;
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === king.coordinates;
 }
-function traceDiagonalAscendentRightToLeft(coordinates, pawn, king) {
+function traceDiagonalAscendentRightToLeft(coordinates, pawn, king,piecesAlive,turn) {
   //lletra -- num ++
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -253,14 +254,14 @@ function traceDiagonalAscendentRightToLeft(coordinates, pawn, king) {
     if (diagonalAscendentRightToLeft.length > 0) {
       diagonalAscendentRightToLeft.pop();
     }
-    return filterOrderAndGetFirstElement(diagonalAscendentRightToLeft);
+    return filterOrderAndGetFirstElement(diagonalAscendentRightToLeft,piecesAlive,turn);
   }
   --letter;
   ++num;
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === king.coordinates;
 }
-function traceDiagonalDescendentLeftToRight(coordinates, pawn, king) {
+function traceDiagonalDescendentLeftToRight(coordinates, pawn, king,piecesAlive,turn) {
   //lletra++ num --
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -278,14 +279,14 @@ function traceDiagonalDescendentLeftToRight(coordinates, pawn, king) {
     if (diagonalDescendentLeftToRight.length > 0) {
       diagonalDescendentLeftToRight.pop();
     }
-    return filterOrderAndGetFirstElement(diagonalDescendentLeftToRight);
+    return filterOrderAndGetFirstElement(diagonalDescendentLeftToRight,piecesAlive,turn);
   }
   ++letter;
   --num;
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === king.coordinates;
 }
-function traceDiagonalDescendentRightToLeft(coordinates, pawn, king) {
+function traceDiagonalDescendentRightToLeft(coordinates, pawn, king,piecesAlive,turn) {
   //lletra -- num --
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -303,7 +304,7 @@ function traceDiagonalDescendentRightToLeft(coordinates, pawn, king) {
     if (diagonalDescendentRightToLeft.length > 0) {
       diagonalDescendentRightToLeft.pop();
     }
-    return filterOrderAndGetFirstElement(diagonalDescendentRightToLeft);
+    return filterOrderAndGetFirstElement(diagonalDescendentRightToLeft,piecesAlive,turn);
   }
   --letter;
   --num;
@@ -351,9 +352,9 @@ function tracePositionsKnight(coordinates, king) {
   //si el rey està posicionat en alguna d'aquestes posicions-> jaque
   return possibleMovements.includes(coordinatesKing);
 }
-function filterOrderAndGetFirstElement(range) {
+function filterOrderAndGetFirstElement(range,piecesAlive,turn) {
   if (range.length > 0) {
-    let piecesInRange = gameState.piecesAlive.filter((piece) =>
+    let piecesInRange = piecesAlive.filter((piece) =>
       range.includes(piece.coordinates)
     );
     //ara les ordenem
@@ -370,7 +371,7 @@ function filterOrderAndGetFirstElement(range) {
       //ara agafem la primera posicio de l'array de peces ordenat i si es un rey, doncs serà jaque
       return (
         piecesInRangeSorted[0].type === "king" &&
-        piecesInRangeSorted[0].color === gameState.turn
+        piecesInRangeSorted[0].color === turn
       );
     }
   }

@@ -9,6 +9,22 @@ comprovar usant el codi de checkdetection si totes les casselles estan amenaçad
 provar tots els moviments possibles que pot fer en les seues peces, per cada moviment revisar les casselles amenaçades del rei, 
 si hi ha una sense amenaçar es pot lliurar el jaque mate.
 */
+import { Bishop } from "./piecesobjects/bishop.js";
+import { King } from "./piecesobjects/king.js";
+import { Knight } from "./piecesobjects/knight.js";
+import { Pawn } from "./piecesobjects/pawn.js";
+import { Queen } from "./piecesobjects/queen.js";
+import { Rook } from "./piecesobjects/rook.js";
+import { PieceFather } from "./piecesobjects/piecefather.js";
+import {
+  getPieceObject,
+  isPathBlocked,
+  range,
+  rangeLetter,
+  rangeDiagonalLetter,
+  hasPieces,
+} from "./piecesbetween.js";
+import { isMovementValidHandler } from "./main.js";
 import { gameState } from "./main.js";
 import { limits } from "./checkdetection.js";
 export { isCheckMate };
@@ -46,7 +62,7 @@ function isCheckMate(turn) {
   //el codi sera similar a el check detection, de fet fare copia i pega i modificare certes coses
   //tambe ho adaptare per a que detecte si hi ha un jaque, aixina aprofite i li clave un so to flama
   if (areAllPositionsChecked(piecesOpponent, closePositionsKing)) {
-    if (cantStopCheck(copyOfCopyPiecesAlive, turn, king)) {
+    if (cantStopCheck(copyPiecesAlive, copyOfCopyPiecesAlive, turn, king)) {
       return true;
     }
   }
@@ -433,7 +449,7 @@ function filterOrderSliceAndEvaluate(range, closePosition) {
   }
   return false;
 }
-function cantStopCheck(CopyPiecesAlive, turn, king) {
+function cantStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king) {
   /*estava pensant en fer-ho a base de força bruta pero ho veig terrible*/
   /*
     2)quines son les caselles que haurem de bloquejar? si es que es pot escapar del jaque mate...
@@ -442,61 +458,248 @@ function cantStopCheck(CopyPiecesAlive, turn, king) {
     */
   //per a determinar les "hot positions haurem de traçar una vertical una horitzontal, les diagonals, y les posicions dels cavalls"
   const kingPosition = king.coordinates;
-  let piecesAttacking = [];
   let verticalAscendentRange = traceVerticalAscendentRange(kingPosition);
-   let verticalDescendentRange = traceVerticalDescendentRange(kingPosition);
-   let horizontalLeftToRightRange = traceHorizontalLeftToRightRange(kingPosition);
-   let horizontalRightToLeftRange = traceHorizontalRightToLeftRange(kingPosition);
-    let diagonalAscendentLeftToRightRange = traceDiagonalAscendentLeftToRightRange(kingPosition);
-    let diagonalAscendentRightToLeftRange = traceDiagonalAscendentRightToLeftRange(kingPosition);
-    let diagonalDescendentLeftToRightRange = traceDiagonalDescendentLeftToRightRange(kingPosition);
-    let diagonalDescendentRightToLeftRange = traceDiagonalDescendentRightToLeftRange(kingPosition);
-    let positionsKnightRange = tracePositionsKnightRange(kingPosition);
-/*ara vegem les branques on realment estan les amenaces*/
-/*la funcio relevantOrIrrelevantBranch el que fara primer de tot es anar recorreguent el array, si la primera peça es del color del torn no representa una amenaça, si la primera es del color opost i no es ni rook ni queen no representa cap amenaça
+  let verticalDescendentRange = traceVerticalDescendentRange(kingPosition);
+  let horizontalLeftToRightRange =
+    traceHorizontalLeftToRightRange(kingPosition);
+  let horizontalRightToLeftRange =
+    traceHorizontalRightToLeftRange(kingPosition);
+  let diagonalAscendentLeftToRightRange =
+    traceDiagonalAscendentLeftToRightRange(kingPosition);
+  let diagonalAscendentRightToLeftRange =
+    traceDiagonalAscendentRightToLeftRange(kingPosition);
+  let diagonalDescendentLeftToRightRange =
+    traceDiagonalDescendentLeftToRightRange(kingPosition);
+  let diagonalDescendentRightToLeftRange =
+    traceDiagonalDescendentRightToLeftRange(kingPosition);
+  let positionsKnightRange = tracePositionsKnightRange(kingPosition);
+  /*ara vegem les branques on realment estan les amenaces*/
+  /*la funcio relevantOrIrrelevantBranch el que fara primer de tot es anar recorreguent el array, si la primera peça es del color del torn no representa una amenaça, si la primera es del color opost i no es ni rook ni queen no representa cap amenaça
 si en la branca no hi ha cap peça no representa cap amenaça. En cas de detectar-se una amenaça tornarà la branca des de l'inici fins a la peça incloent-la, ademés s'afegirà ixa peça a les peces que amenacen el rei.
 */
-verticalAscendentRange = relevantOrIrrelevantBranch(verticalAscendentRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
-verticalDescendentRange =  relevantOrIrrelevantBranch(verticalAscendentRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
-horizontalLeftToRightRange = relevantOrIrrelevantBranch(horizontalLeftToRightRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
-horizontalRightToLeftRange = relevantOrIrrelevantBranch(horizontalRightToLeftRange,['rook','queen'],piecesAttacking,turn,CopyPiecesAlive);
-if(turn==='white'){
-  /*el peo amenaçador serà el negre i per tant podrà amenaçar en diagonal descendent*/
-  diagonalAscendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalAscendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalDescendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalDescendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
-
-}else{
-  /*el torn es black, per tant el pero amenaçador serà el blanc i podrà amenaçar en diagonal ascendent*/
-  diagonalAscendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalAscendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop','pawn'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalDescendentLeftToRightRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
-  diagonalDescendentRightToLeftRange = relevantOrIrrelevantBranch(verticalAscendentRange,['queen','bishop'],piecesAttacking,turn,CopyPiecesAlive);
-}
-//en el de positions knight, sino hi ha cap cavall en eixes casselles branca fora
-//el tema de les amenaces dels cavalls ho evaluarem independentment doncs aquestos no es poden bloquejar o els mates o res
-positionsKnightRange = relevantOrIrrelevantBranch(positionsKnightRange,['knight'],piecesAttacking,turn);
-}
-function relevantOrIrrelevantBranch(positions,potentialAttackers,piecesAttacking,turn,CopyPiecesAlive){
-  let pieceFind;
-  positions.forEach((position)=>{
-    pieceFind = CopyPiecesAlive.find((piece)=>{
-      return potentialAttackers.includes(piece.type);
-    })
-  })
-  if(!pieceFind){
-    //sino s'ha trobat-> irrellevant
-    return [];
+  //si hi ha algun rei amenaçant alguna peça colindant, el obviem, doncs no constitueix una amenaça
+  //pq no pot fer jaque, i apart no es pot capturar
+  let mapPieceRange = new Map();
+  relevantOrIrrelevantBranch(
+    verticalAscendentRange,
+    ["rook", "queen"],
+    turn,
+    CopyPiecesAlive,
+    kingPosition,
+    mapPieceRange
+  );
+  relevantOrIrrelevantBranch(
+    verticalDescendentRange,
+    ["rook", "queen"],
+    turn,
+    CopyPiecesAlive,
+    kingPosition,
+    mapPieceRange
+  );
+  relevantOrIrrelevantBranch(
+    horizontalLeftToRightRange,
+    ["rook", "queen"],
+    turn,
+    CopyPiecesAlive,
+    kingPosition,
+    mapPieceRange
+  );
+  relevantOrIrrelevantBranch(
+    horizontalRightToLeftRange,
+    ["rook", "queen"],
+    turn,
+    CopyPiecesAlive,
+    kingPosition,
+    mapPieceRange
+  );
+  if (turn === "black") {
+    /*el peo amenaçador serà el blanc i podrà amenaçar en diagonal ascendent*/
+    relevantOrIrrelevantBranch(
+      diagonalDescendentLeftToRightRange,
+      ["queen", "bishop"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalDescendentRightToLeftRange,
+      ["queen", "bishop"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalAscendentLeftToRightRange,
+      ["queen", "bishop", "pawn"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalAscendentRightToLeftRange,
+      ["queen", "bishop", "pawn"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+  } else {
+    /*el peo amenaçador serà el negre i podrà amenaçar en diagonal descendent*/
+    relevantOrIrrelevantBranch(
+      diagonalDescendentLeftToRightRange,
+      ["queen", "bishop", "pawn"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalDescendentRightToLeftRange,
+      ["queen", "bishop", "pawn"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalAscendentLeftToRightRange,
+      ["queen", "bishop"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
+    relevantOrIrrelevantBranch(
+      diagonalAscendentRightToLeftRange,
+      ["queen", "bishop"],
+      turn,
+      CopyPiecesAlive,
+      kingPosition,
+      mapPieceRange
+    );
   }
-  if(pieceFind.color!==turn){
-    //s'ha trobat una peça del
-    piecesAttacking.push(pieceFind);
-    
+  //en el de positions knight, sino hi ha cap cavall en eixes casselles branca fora
+  //el tema de les amenaces dels cavalls ho evaluarem independentment doncs aquestos no es poden bloquejar o els mates o res
+  relevantOrIrrelevantBranch(
+    positionsKnightRange,
+    ["knight"],
+    turn,
+    kingPosition,
+    mapPieceRange
+  );
+  //modus operandi
+  //1) pillar les peces del color del torn (totes)
+  let piecesColorTurn = [];
+  CopyPiecesAlive.forEach((piece) => {
+    if (piece.color === turn) {
+      piecesColorTurn.push(piece);
+    }
+  });
 
+  return checkMateValidatorIterator(
+    CopyPiecesAlive,
+    copyOfCopyPiecesAlive,
+    piecesColorTurn,
+    mapPieceRange,
+    king
+  );
+}
+
+function checkMateValidatorIterator(
+  CopyPiecesAlive,
+  copyOfCopyPiecesAlive,
+  piecesColorTurn,
+  mapPieceRange,
+  king
+) {
+  for (const pieceAttacker of mapPieceRange) {
+    //end
+    let pieceType2 = pieceAttacker.type;
+    let end =
+      pieceAttacker.type +
+      pieceAttacker.color +
+      "_" +
+      pieceAttacker.coordinates;
+    for (let i = 0; i < piecesColorTurn.lenght; i++) {
+      //start
+      let start = piecesColorTurn[i].coordinates;
+      let pieceType = piecesColorTurn[i].type;
+      //isMovementValidHandler(start, end, pieceType, pieceType2) 
+      if (isMovementValidHandler(start,end,pieceType,pieceType2)) {
+      }
+    }
   }
-  return [];
+}
 
+function relevantOrIrrelevantBranch(
+  positions,
+  potentialAttackers,
+  turn,
+  CopyPiecesAlive,
+  kingPosition,
+  mapPieceRange
+) {
+  //previ a açò haurem de fer un apartat per al cavall, doncs totes les posicions, si es que es trobe cavall
+  //opost seran amenaces a validar
+  if (potentialAttackers[0] === "knight") {
+    //filtrem per peces de color opost que siguen cavalls i apart incloguen alguna de les posicions claus
+    CopyPiecesAlive.filter((piece) => {
+      if (
+        piece.color !== turn &&
+        piece.type === "knight" &&
+        positions.includes(piece.coordinates)
+      ) {
+        mapPieceRange.set(piece, []);
+      }
+    });
+    return;
+  }
+  let findIndex;
+  positions.forEach((position) => {
+    findIndex = CopyPiecesAlive.findIndex((piece) => {
+      //pillem la primera ocurrencia
+      return piece.coordinates === position;
+    });
+  });
+  if (findIndex === -1) {
+    //sino s'ha trobat cap peça la branca es irrellevant i no clavarem elements a clau-valor
+    return;
+  }
+  let pieceFind = { ...CopyPiecesAlive[findIndex] };
+  if (pieceFind.color !== turn) {
+    //s'ha trobat una peça amenaçant
+    if (potentialAttackers.includes(piecesAttacking)) {
+      //haurem de veure si es peo y si aquest constitueix una amenaça
+      //quan constitueix una amenaça? quan la diferencia absoluta entre el rei i el peo és de 1 o 2
+      if ((pieceFind.type = "pawn")) {
+        let numKing = parseInt(kingPosition.split("")[1]);
+        let pawnNumber = parseInt(pieceFind.coordinates.split("")[1]);
+
+        if (pieceFind.color === "white") {
+          //ataca ascendentment
+          //si el rei està 1 o 2 per damunt del peo, constituirà una amenaça
+          if (numKing - pawnNumber === 1 || numKing - pawnNumber === 2) {
+            mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+            return;
+          }
+        } else {
+          if (numKing - pawnNumber === -1 || numKing - pawnNumber === -2) {
+            mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+            return;
+          }
+        }
+      } else {
+        //si hi ha algujna peça de color opost i apart ataca, capem el rang i l'incloem
+        mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+        return;
+      }
+    }
+  }
+  //sino es una peça del color opost, la branca es irrellevant
+  return;
 }
 
 function traceVerticalAscendentRange(coordinates) {

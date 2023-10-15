@@ -25,6 +25,7 @@ import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
 export { gameState };
+export {isMovementValidHandler};
 
 let movementTarget = [];
 let gameState = {
@@ -246,7 +247,7 @@ function captureAction(e) {
  //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
         movePieceWithoutRefreshHtml(movementTarget);
         
-        if(!isKingCheck(gameState.turn)){
+        if(!isKingCheck(gameState.turn,gameState.piecesAlive)){
           //si el rei no esta en jaque
           //carreguem els arrays originals sense modificar i efectuem el moviment
           pastContentArrays();
@@ -307,7 +308,7 @@ function captureAction(e) {
         ) {
           copyArrays();
           killPieceWithoutRefreshHtml(movementTarget);
-          if(!isKingCheck(gameState.turn)){
+          if(!isKingCheck(gameState.turn,gameState.piecesAlive)){
             pastContentArrays();
             playRandomAttackSound();
             killPiece(movementTarget);
