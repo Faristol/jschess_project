@@ -13,8 +13,8 @@ import { gameState } from "./main.js";
 import { limits } from "./checkdetection.js";
 export { isCheckMate };
 function isCheckMate(turn) {
-  const copyPiecesAlive = gameState.piecesAlive.map(piece => piece.clone());
-  let copyOfCopyPiecesAlive = copyPiecesAlive.map(piece => piece.clone());
+  const copyPiecesAlive = gameState.piecesAlive.map((piece) => piece.clone());
+  let copyOfCopyPiecesAlive = copyPiecesAlive.map((piece) => piece.clone());
   const colorPiecesOpponent = turn === "white" ? "black" : "white";
   const piecesOpponent = [];
   gameState.piecesAlive.forEach((piece) => {
@@ -45,13 +45,12 @@ function isCheckMate(turn) {
   //una vegada tinguem l'array de posicions evaluem si en totes les peces hi ha jaque:
   //el codi sera similar a el check detection, de fet fare copia i pega i modificare certes coses
   //tambe ho adaptare per a que detecte si hi ha un jaque, aixina aprofite i li clave un so to flama
-  if(areAllPositionsChecked(piecesOpponent, closePositionsKing)){
-    if(cantStopCheck(copyOfCopyPiecesAlive,turn,king)){
-        return true;
+  if (areAllPositionsChecked(piecesOpponent, closePositionsKing)) {
+    if (cantStopCheck(copyOfCopyPiecesAlive, turn, king)) {
+      return true;
     }
   }
   return false;
-  
 }
 function calculateNearPositions(kingCoordinates) {
   let positions = [];
@@ -434,24 +433,237 @@ function filterOrderSliceAndEvaluate(range, closePosition) {
   }
   return false;
 }
-function cantStopCheck(CopyPiecesAlive,turn,king){
-    /*estava pensant en fer-ho a base de força bruta pero ho veig terrible*/
-    /*
-    1)Si arriba a cantStopCheck es que totes les posicions de alvoltant que no son peces seues estan en jaque, inclos la seua posicio
-    per tant, el rei no es pot moure, una cosa menos a mirar
+function cantStopCheck(CopyPiecesAlive, turn, king) {
+  /*estava pensant en fer-ho a base de força bruta pero ho veig terrible*/
+  /*
     2)quines son les caselles que haurem de bloquejar? si es que es pot escapar del jaque mate...
     3) si es que hi ha alguna manera de parar un jaque mate, podem obtindre les posicions a partir de les cuals es pot donar jaque mate,
     determinar les peces que estan en el radi de jaque del rey
     */
+  //per a determinar les "hot positions haurem de traçar una vertical una horitzontal, les diagonals, y les posicions dels cavalls"
+  const kingPosition = king.coordinates;
+  const hotPositions = traceVerticalAscendentRange(kingPosition)
+    .concat(traceVerticalDescendentRange(kingPosition))
+    .concat(traceHorizontalLeftToRightRange(kingPosition))
+    .concat(traceHorizontalRightToLeftRange(kingPosition))
+    .concat(traceDiagonalAscendentLeftToRightRange(kingPosition))
+    .concat(traceDiagonalAscendentRightToLeftRange(kingPosition))
+    .concat(traceDiagonalDescendentLeftToRightRange(kingPosition))
+    .concat(traceDiagonalDescendentRightToLeftRange(kingPosition))
+    .concat(tracePositionsKnightRange(kingPosition));
+    //ara d'aquesta hot position avaluem en cada trajectoria les peces del color opost 
+    //les primeres que es troben
+    const fristPiecesOppositeColorInHotPositions=[];
+    //idea ESTELAR-> per a veure si em carregar alguna peça crear per a cada peça de fristPiecesOppositeColorInHotPositions=[]
+    //un radi d'atack a l'igual que he fet amb el rei->
+    /*
+    ->si o be en alguna horizontal o vertical, la primera peça es o torre o reina me la carregue
+    ->si en alguna diagonal tinc alguna reina, peo(1mov) o alfil me la carregue
+    ->si tinc algun cavall en radi d'accio i mel puc carregar -> mel carregue
+
+    per a cada "kill" avaluar l'estat del jaque si deixa d'estar en jaque-> no jaque mate
+
+    després passem a intentar bloquejar, mateix plantejament que en el atack, ara el target no es una peça sino un escac
+    */
 
 
-  
-  
-  
-  
-  
-
-      
 
 
+    
+}
+
+function traceVerticalAscendentRange(coordinates) {
+  /*lletra constant numero augmenta*/
+  let position = coordinates;
+  const letter = position.split("")[0];
+  let num = parseInt(position.split("")[1]);
+  let verticalAscendentRange = [];
+  while (!verticalAscendentRange.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    ++num;
+    verticalAscendentRange.push(letter + num);
+  }
+  /*llevem l'ultim element de l'array*/
+  if (verticalAscendentRange.length > 0) {
+    verticalAscendentRange.pop();
+  }
+  return verticalAscendentRange;
+}
+
+function traceVerticalDescendentRange(coordinates) {
+  //letra constant numero disminueix
+  let position = coordinates;
+  const letter = position.split("")[0];
+  let num = parseInt(position.split("")[1]);
+  let verticalDescendentRange = [];
+  while (!verticalDescendentRange.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    --num;
+    verticalDescendentRange.push(letter + num);
+  }
+  /*llevem l'ultim element de l'array*/
+  //si sols te un element serà un limit
+  if (verticalDescendentRange.length > 0) {
+    verticalDescendentRange.pop();
+  }
+  return verticalDescendentRange;
+}
+function traceHorizontalLeftToRightRange(coordinates) {
+  //num constant lletra augmenta
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  const num = position.split("")[1];
+
+  let horizontalLeftToRightRange = [];
+
+  while (!horizontalLeftToRightRange.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    ++letter;
+    horizontalLeftToRightRange.push(String.fromCharCode(letter) + num);
+  }
+  if (horizontalLeftToRightRange.length > 0) {
+    horizontalLeftToRightRange.pop();
+  }
+  return horizontalLeftToRightRange;
+}
+function traceHorizontalRightToLeftRange(coordinates) {
+  //num constant lletra disminueix
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  const num = position.split("")[1];
+
+  let horizontalRightToLeftRange = [];
+
+  while (!horizontalRightToLeftRange.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    --letter;
+    horizontalRightToLeftRange.push(String.fromCharCode(letter) + num);
+  }
+  if (horizontalRightToLeftRange.length > 0) {
+    horizontalRightToLeftRange.pop();
+  }
+  return horizontalRightToLeftRange;
+}
+function traceDiagonalAscendentLeftToRightRange(coordinates) {
+  //el tema del control del jaque amb peons el controlarem a ma i iau
+  //lletra ++ num ++
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  let num = parseInt(position.split("")[1]);
+  let diagonalAscendentLeftToRight = [];
+
+  while (!diagonalAscendentLeftToRight.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    ++letter;
+    ++num;
+    diagonalAscendentLeftToRight.push(String.fromCharCode(letter) + num);
+  }
+
+  if (diagonalAscendentLeftToRight.length > 0) {
+    diagonalAscendentLeftToRight.pop();
+  }
+  return diagonalAscendentLeftToRight;
+}
+function traceDiagonalAscendentRightToLeftRange(coordinates) {
+  //lletra -- num ++
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  let num = parseInt(position.split("")[1]);
+
+  let diagonalAscendentRightToLeft = [];
+
+  while (!diagonalAscendentRightToLeft.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    --letter;
+    ++num;
+    diagonalAscendentRightToLeft.push(String.fromCharCode(letter) + num);
+  }
+
+  if (diagonalAscendentRightToLeft.length > 0) {
+    diagonalAscendentRightToLeft.pop();
+  }
+  return diagonalAscendentRightToLeft;
+}
+function traceDiagonalDescendentLeftToRightRange(coordinates) {
+  //lletra++ num --
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  let num = parseInt(position.split("")[1]);
+  let diagonalDescendentLeftToRight = [];
+
+  while (!diagonalDescendentLeftToRight.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    ++letter;
+    --num;
+    diagonalDescendentLeftToRight.push(String.fromCharCode(letter) + num);
+  }
+
+  if (diagonalDescendentLeftToRight.length > 0) {
+    diagonalDescendentLeftToRight.pop();
+  }
+  return diagonalDescendentLeftToRight;
+}
+function traceDiagonalDescendentRightToLeftRange(coordinates) {
+  //lletra -- num --
+  let position = coordinates;
+  let letter = position.split("")[0].charCodeAt(0);
+  let num = parseInt(position.split("")[1]);
+  let diagonalDescendentRightToLeft = [];
+
+  while (!diagonalDescendentRightToLeft.some((xy) => limits.includes(xy))) {
+    //en el moment que hi haja un element de limits inclos en verticalAscendentRange pararà, i l'ultim element serà el limit. deurem llevarlo
+    --letter;
+    --num;
+    diagonalDescendentRightToLeft.push(String.fromCharCode(letter) + num);
+  }
+
+  if (diagonalDescendentRightToLeft.length > 0) {
+    diagonalDescendentRightToLeft.pop();
+  }
+  return diagonalDescendentRightToLeft;
+}
+function tracePositionsKnightRange(coordinates) {
+  let startLetter = coordinates.split("")[0].charCodeAt(0);
+  let startNumber = parseInt(coordinates.split("")[1]);
+  let possibleMovements = [];
+  /*cavall 8 possibles moviments*/
+  /*char +1 num +2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 1) + (startNumber + 2)
+  );
+  /*char +2 num+1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 2) + (startNumber + 1)
+  );
+  /*char +2 num -1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 2) + (startNumber - 1)
+  );
+  /*char +1 num-2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter + 1) + (startNumber - 2)
+  );
+  /*char -1 num +2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 1) + (startNumber + 2)
+  );
+  /*char -2 num +1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 2) + (startNumber + 1)
+  );
+  /*char -2 num -1*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 2) + (startNumber - 1)
+  );
+  /*char -1 num -2*/
+  possibleMovements.push(
+    String.fromCharCode(startLetter - 1) + (startNumber - 2)
+  );
+  let possibleMovementsWithoutTrash = [];
+  for (let i = 0; i < possibleMovements.length; i++) {
+    if (!limits.includes(possibleMovements[i])) {
+      possibleMovementsWithoutTrash.push(possibleMovements[i]);
+    }
+  }
+  return possibleMovementsWithoutTrash;
 }
