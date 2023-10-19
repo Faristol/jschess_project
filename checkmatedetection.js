@@ -103,14 +103,17 @@ function areAllPositionsChecked(piecesOpponent, closePositionsKing,turn) {
   let checks = 0;
   for (let i = 0; i < closePositionsKing.length; i++) {
     console.log(closePositionsKing[i]);
-    if (isCheckedClosePosition(piecesOpponent, closePositionsKing[i],turn)) {
-      checks++;
-      console.log(checks);
+    if (!isCheckedClosePosition(piecesOpponent, closePositionsKing[i],turn)) {
+//anem recorreguent totes les posicions annexes al rei
+//isCheckedClosePosition retorna true quan el closePosition[i] està afectat, si retorna false, es que no esta afectada, entra
+//a esta condicio i retornem false
+return false;
+
     }
   }
-  console.log(turn);
-  console.log(checks);
- return checks>=closePositionsKing.length;
+  //si aplega ací es per que en totes les closePositionKing la funcio ha retornat true i per tant no ha entrat en el if
+  //retornem true;
+return true;
 }
 function isCheckedClosePosition(piecesOpponent, closePosition,turn) {
   return piecesMovementHandler(piecesOpponent, closePosition,turn);
@@ -458,6 +461,7 @@ function filterOrderSliceAndEvaluate(range, closePosition, turn) {
         return true;
       }
     }
+    console.log("Rang: "+range+" close position: "+closePosition);
 
     return range.includes(closePosition);
   }
