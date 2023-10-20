@@ -1,20 +1,17 @@
 {
+  "type": "module",
   "name": "jschess_project",
   "version": "1.0.0",
   "description": "",
-  "main": "main.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Faristol/jschess_project.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Faristol/jschess_project/issues"
-  },
-  "homepage": "https://github.com/Faristol/jschess_project#readme"
+  "dependencies": {
+    "jasmine-browser-runner": "^2.3.0",
+    "jasmine-core": "^5.1.1"
+  }
 }
