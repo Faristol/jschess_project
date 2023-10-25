@@ -6,28 +6,28 @@ export {
   refreshPiecesDead,
   refreshPositionPiecesAlive,
 };
-import { gameState } from "./main.js";
 
-function refreshMovementWhiteBlackOnlyMove(idPiece) {
+
+function refreshMovementWhiteBlackOnlyMove(idPiece,gameState) {
   if (gameState.movementWhiteBlack.length === 0) {
-    findAndPushPieceToMoveWhiteBlack(idPiece);
+    findAndPushPieceToMoveWhiteBlack(idPiece,gameState);
   } else {
-    findAndPushPieceToMoveWhiteBlack(idPiece);
+    findAndPushPieceToMoveWhiteBlack(idPiece,gameState);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
     gameState.movementWhiteBlack = [];
   }
 }
 
-function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill) {
+function refreshMovementWhiteBlackKill(pieceKiller, pieceToKill,gameState) {
   if (gameState.movementWhiteBlack.length === 0) {
-    findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill);
+    findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill,gameState);
   } else {
-    findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill);
+    findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill,gameState);
     gameState.movementRegister.push(gameState.movementWhiteBlack);
     gameState.movementWhiteBlack = [];
   }
 }
-function findAndPushPieceToMoveWhiteBlack(idPiece) {
+function findAndPushPieceToMoveWhiteBlack(idPiece,gameState) {
   let piece = gameState.piecesAlive.find(
     (piece) => piece.coordinates === idPiece.id.split("_")[1] || piece.coordinates === idPiece.id
   );
@@ -35,7 +35,7 @@ function findAndPushPieceToMoveWhiteBlack(idPiece) {
   let coordinates = piece.coordinates;
   gameState.movementWhiteBlack.push(notationName + coordinates);
 }
-function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
+function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill,gameState) {
   let coordinatesPieceKiller = pieceKiller.id.split("_")[1];
   let killer = gameState.piecesAlive.find(
     (piece) => piece.coordinates === coordinatesPieceKiller
@@ -58,14 +58,14 @@ function findAndPushPieceToKillWhiteBlack(pieceKiller, pieceToKill) {
       coordinatesPieceToK
   );
 }
-function refreshPositionPiecesAlive(idDestination0, idDestinationF) {
+function refreshPositionPiecesAlive(idDestination0, idDestinationF,gameState) {
   /*actualitzem l'element mogut a la nova coordenada*/
   let index = gameState.piecesAlive.findIndex(
     (piece) => piece.coordinates === idDestination0
   );
   if (index !== -1) gameState.piecesAlive[index].coordinates = idDestinationF;
 }
-function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
+function refreshPiecesDead(copyPieceToKill, copyPieceKiller,gameState) {
 
 
   let coordinates = copyPieceToKill.id.split("_")[1];
@@ -78,6 +78,6 @@ function refreshPiecesDead(copyPieceToKill, copyPieceKiller) {
     gameState.piecesDead.push(element);
     gameState.piecesAlive.splice(index, 1);
     let coordinates0 = copyPieceKiller.id.split("_")[1];
-    refreshPositionPiecesAlive(coordinates0, coordinates);
+    refreshPositionPiecesAlive(coordinates0, coordinates,gameState);
   }
 }

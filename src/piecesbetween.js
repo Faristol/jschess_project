@@ -6,14 +6,14 @@ export {
   isPathBlocked,
   hasPieces,
 };
-import { gameState } from "./main.js";
-function getPieceObject(start, pieceType) {
+
+function getPieceObject(start, pieceType,gameState) {
   let pieceObject = gameState.piecesAlive.find(
     (piece) => piece.coordinates === start && piece.type === pieceType
   );
   return pieceObject;
 }
-function isPathBlocked(range) {
+function isPathBlocked(range,gameState) {
   let index = gameState.piecesAlive.findIndex((piece) =>
     range.includes(piece.coordinates)
   );
@@ -46,7 +46,7 @@ function rangeDiagonalLetter(start, end) {
   return rangeLetter;
 }
 
-function hasPieces(start, end) {
+function hasPieces(start, end,gameState) {
   /*primer veure si es un moviment horizontal, vertical, diagonal, o, és una L (cavall)*/
   /*HORIZONTAL->  numero constant varia lletra*/
   /*VERTICAL ->  numero variable lletra constant*/
@@ -66,7 +66,7 @@ function hasPieces(start, end) {
         parseInt(endLetterNumber[1]),
         startLetterNumber[0]
       );
-      return isPathBlocked(rangeVertical);
+      return isPathBlocked(rangeVertical,gameState);
     } else {
       /*Moviment vertical descendent*/
       //console.log("moviment vertical descendent");
@@ -75,7 +75,7 @@ function hasPieces(start, end) {
         parseInt(startLetterNumber[1]),
         startLetterNumber[0]
       );
-      return isPathBlocked(rangeVertical);
+      return isPathBlocked(rangeVertical,gameState);
     }
   } else if (startLetterNumber[1] === endLetterNumber[1]) {
     let rangeHorizontal;
@@ -88,7 +88,7 @@ function hasPieces(start, end) {
         endLetterNumber[0],
         startLetterNumber[1]
       );
-      return isPathBlocked(rangeHorizontal);
+      return isPathBlocked(rangeHorizontal,gameState);
     } else {
       /*DESPLAÇAMENT HORITZONTAL DE DRETA A ESQUERRA*/
       //console.log("moviment horitzontal dreta-esquerra");
@@ -97,7 +97,7 @@ function hasPieces(start, end) {
         startLetterNumber[0],
         startLetterNumber[1]
       );
-      return isPathBlocked(rangeHorizontal);
+      return isPathBlocked(rangeHorizontal,gameState);
     }
   } else {
     /*diagonal*/
@@ -135,7 +135,7 @@ function hasPieces(start, end) {
           let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
             (letter, index) => letter + (startNumber + index)
           );
-          return isPathBlocked(rangeLetterNumberDiagonal);
+          return isPathBlocked(rangeLetterNumberDiagonal,gameState);
         } else {
           //console.log("moviment diagonal ascendent dreta-esquerra-");
           rangeLetterAscendent = rangeDiagonalLetter(endLetter, startLetter);
@@ -143,7 +143,7 @@ function hasPieces(start, end) {
           let rangeLetterNumberDiagonal = rangeLetterAscendent.map(
             (letter, index) => letter + (endNumber - index)
           );
-          return isPathBlocked(rangeLetterNumberDiagonal);
+          return isPathBlocked(rangeLetterNumberDiagonal,gameState);
         }
       } else {
         let rangeLetterDescendent;
@@ -154,7 +154,7 @@ function hasPieces(start, end) {
           let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
             (letter, index) => letter + (startNumber - index)
           );
-          return isPathBlocked(rangeLetterNumberDiagonal);
+          return isPathBlocked(rangeLetterNumberDiagonal,gameState);
         } else {
           rangeLetterDescendent = rangeDiagonalLetter(endLetter, startLetter);
           //console.log("moviment diagonal descendent dretaesquerra-");
@@ -162,7 +162,7 @@ function hasPieces(start, end) {
           let rangeLetterNumberDiagonal = rangeLetterDescendent.map(
             (letter, index) => letter + (endNumber + index)
           );
-          return isPathBlocked(rangeLetterNumberDiagonal);
+          return isPathBlocked(rangeLetterNumberDiagonal,gameState);
         }
       }
     } else {

@@ -35,6 +35,6 @@ class PieceFather {
     );
   }
   kill(pieceToKill) {
-    /*First of all, determine if the movement is valid. If it's valid and the piece can capture something, then call the function kill*/
+    
   }
 }

@@ -8,7 +8,7 @@ import {
   isDiagonalDescendent,
   isDiagonalAscendent,
 } from "../validation.js";
-import { gameState } from "../main.js";
+
 class King extends PieceFather {
   constructor(color, coordinates) {
     super(color, coordinates, "king");
@@ -23,7 +23,7 @@ class King extends PieceFather {
       this.notationName
     );
   }
-  isKingNear(end) {
+  isKingNear(end,gameState) {
     const colorOpponent = this.color === "white" ? "black" : "white";
     const getKingOpponent = gameState.piecesAlive.find(
       (piece) => piece.type === 'king' && piece.color === colorOpponent
@@ -48,7 +48,7 @@ class King extends PieceFather {
 
 
   }
-  valid(start, end, hasPieces) {
+  valid(start, end, hasPieces,gameState) {
     if (!hasPieces) {
       let startLetter = start.split("")[0];
       let startNumber = parseInt(start.split("")[1]);
@@ -61,7 +61,7 @@ class King extends PieceFather {
       /*en quest cas no cal aplicar cap funcio, doncs el rey es pot moure en totes les direccions
           pero sols d'1 en 1*/
       if (numDifference === 1 || letterDifference === 1) {
-        return this.isKingNear(end);
+        return this.isKingNear(end,gameState);
       } else {
         return false;
       }

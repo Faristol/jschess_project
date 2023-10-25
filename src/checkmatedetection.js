@@ -25,7 +25,6 @@ import {
   hasPieces,
 } from "./piecesbetween.js";
 import { isMovementValidHandler } from "./main.js";
-import { gameState } from "./main.js";
 import { limits } from "./checkdetection.js";
 export { isCheckMate };
 function isCheckMate(turn) {
