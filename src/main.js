@@ -189,9 +189,9 @@ function captureAction(e, gameState, movementTarget) {
           movePiece(movementTarget,gameState);
           changeTurn(gameState);
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
-         /* if(isCheckMate(gameState.turn)){
+         if(isCheckMate(gameState)){
               
-          }*/
+          }
 
 
         }else{
@@ -252,9 +252,9 @@ function captureAction(e, gameState, movementTarget) {
             killPiece(movementTarget,gameState);
             changeTurn(gameState);
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
-            /*if(isCheckMate(gameState.turn)){
+            if(isCheckMate(gameState)){
               
-            }*/
+            }
           }else{
             pastContentArrays(gameState);
           }
