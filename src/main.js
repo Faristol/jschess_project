@@ -25,7 +25,8 @@ import { GameState } from "./gameState.js";
 import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
-export {isMovementValidHandler};
+import { isStaleMate } from "./stalematedetection.js";
+export { isMovementValidHandler };
 document.addEventListener("DOMContentLoaded", start);
 function start() {
   /*create table and put pieces*/
@@ -33,10 +34,10 @@ function start() {
   let gameState = new GameState();
   let movementTarget = [];
 
-  createTablePieces(gameState,movementTarget);
+  createTablePieces(gameState, movementTarget);
   /*game(gameState,movementTarget);*/
 }
-function createTablePieces(gameState,movementTarget) {
+function createTablePieces(gameState, movementTarget) {
   let chessBoard = document.querySelector("#chessboard");
   /*make a array of constructors*/
   let orderPiecesConstructors = [
@@ -70,7 +71,9 @@ function createTablePieces(gameState,movementTarget) {
       let square = document.createElement("span");
       square.classList.add(color);
       square.classList.add("square");
-      square.addEventListener("click", (e) => captureAction(e, gameState, movementTarget));
+      square.addEventListener("click", (e) =>
+        captureAction(e, gameState, movementTarget)
+      );
 
       if (i === 0) {
         /* rock,knight,bishop,king,queen,bishop,knight,rock: black*/
@@ -109,7 +112,6 @@ function createTablePieces(gameState,movementTarget) {
       chessBoard.appendChild(square);
     }
   }
- 
 
   gameState.start = true;
 }
@@ -154,7 +156,7 @@ function captureAction(e, gameState, movementTarget) {
       let start = movementStarts.id.split("_")[1];
       let end = movementEnds.id;
       let pieceType = movementStarts.id.split("_")[0].slice(0, -5);
-      if (isMovementValidHandler(start, end, pieceType,null,gameState)) {
+      if (isMovementValidHandler(start, end, pieceType, null, gameState)) {
         copyArrays(gameState);
         /*abans de mourela fem copia de
         movementRegister: [],
@@ -176,35 +178,33 @@ function captureAction(e, gameState, movementTarget) {
   ->No ho està apliquem el movePiece i el KillPiece normals (actualitzant el html i els arrays), i canviem de torn
   -> Està en jaque->
   */
- //previament em fet una copia dels arrays-> apliquem aquesta funcio, aquesta funcio modificara als que no son copies
- //després verifiquem si el seu rei esta en jaque, sino ho està
- //-> retornem els arrays als valors inicials i efectuem el moviment i canviem el torn
- //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
-        movePieceWithoutRefreshHtml(movementTarget,gameState);
-        
-        if(!isKingCheck(gameState.turn,gameState.piecesAlive)){
+        //previament em fet una copia dels arrays-> apliquem aquesta funcio, aquesta funcio modificara als que no son copies
+        //després verifiquem si el seu rei esta en jaque, sino ho està
+        //-> retornem els arrays als valors inicials i efectuem el moviment i canviem el torn
+        //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
+        movePieceWithoutRefreshHtml(movementTarget, gameState);
+
+        if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
           //si el rei no esta en jaque
           //carreguem els arrays originals sense modificar i efectuem el moviment
           pastContentArrays(gameState);
-          movePiece(movementTarget,gameState);
+          movePiece(movementTarget, gameState);
           changeTurn(gameState);
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
-         if(isCheckMate(gameState)){
-              
+          if (isCheckMate(gameState)) {
+            gameState.start = false;
+            game(gameState, movementTarget);
           }
-
-
-        }else{
+          //sino hi ha jaque mate vegem si el rival esta en stalemate
+          if (isStaleMate(gameState)) {
+            gameState.start = false;
+            game(gameState, movementTarget);
+          }
+        } else {
           pastContentArrays(gameState);
         }
-        
-        
       }
-
-
-      movementTarget.splice(0, movementTarget.length); 
-      console.log("arriba");
-      console.log(movementTarget.length);
+      movementTarget.splice(0, movementTarget.length);
     } else if (
       element.textContent.length !== 0 &&
       movementTarget.length === 1
@@ -226,7 +226,7 @@ function captureAction(e, gameState, movementTarget) {
         /*clavar condicio per a veure si es un enroc*/
 
         /**/
-        movementTarget.splice(0, movementTarget.length); 
+        movementTarget.splice(0, movementTarget.length);
       } else if (!movementTarget[1].id.includes(gameState.turn)) {
         /*peça de color opost*/
         /*ací haurem de posar unes condicions especials, 
@@ -240,37 +240,46 @@ function captureAction(e, gameState, movementTarget) {
         let pieceTypeKiller = movementStarts.id.split("_")[0].slice(0, -5);
         let pieceTypeToKill = movementEnds.id.split("_")[0].slice(0, -5);
 
-
         if (
-          isMovementValidHandler(start, end, pieceTypeKiller, pieceTypeToKill,gameState)
+          isMovementValidHandler(
+            start,
+            end,
+            pieceTypeKiller,
+            pieceTypeToKill,
+            gameState
+          )
         ) {
           copyArrays(gameState);
-          killPieceWithoutRefreshHtml(movementTarget,gameState);
-          if(!isKingCheck(gameState.turn,gameState.piecesAlive)){
+          killPieceWithoutRefreshHtml(movementTarget, gameState);
+          if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
             pastContentArrays(gameState);
             playRandomAttackSound();
-            killPiece(movementTarget,gameState);
+            killPiece(movementTarget, gameState);
             changeTurn(gameState);
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
-            if(isCheckMate(gameState)){
-              
+            if (isCheckMate(gameState)) {
+              gameState.start = false;
+              game(gameState, movementTarget);
             }
-          }else{
+            if (isStaleMate(gameState)) {
+              gameState.start = false;
+              game(gameState, movementTarget);
+            }
+          } else {
             pastContentArrays(gameState);
           }
-          
         }
-        movementTarget.splice(0, movementTarget.length); 
+        movementTarget.splice(0, movementTarget.length);
       }
     }
   }
-  game(gameState,movementTarget);
 }
-function game(gameState,movementTarget) {
+function game(gameState, movementTarget) {
   /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
   /*si arriba ací el joc encara esta en start, però falta 1 moviment x a fer la copia*/
   console.log(gameState.start);
   if (!gameState.start) {
+    console.log("Joc Acabat");
   }
 }
 function gameEnd() {}
@@ -283,7 +292,7 @@ function enableDisableMovementPlayerColor(colorEnableMove, colorDisableMove) {
 function changeTurn(gameState) {
   gameState.turn = gameState.turn === "white" ? "black" : "white";
 }
-function movePieceWithoutRefreshHtml(movementTarget,gameState){
+function movePieceWithoutRefreshHtml(movementTarget, gameState) {
   let pieceToMove = movementTarget[0];
   let destination = movementTarget[1];
 
@@ -295,14 +304,15 @@ function movePieceWithoutRefreshHtml(movementTarget,gameState){
 
   let idPieceToMoveWhitoutPiece = idPieceToMove.split("_")[1];
 
-  refreshPositionPiecesAlive(idPieceToMoveWhitoutPiece,idDestination,gameState);
-  refreshMovementWhiteBlackOnlyMove(copySquareDestination,gameState);
-
-
-
+  refreshPositionPiecesAlive(
+    idPieceToMoveWhitoutPiece,
+    idDestination,
+    gameState
+  );
+  refreshMovementWhiteBlackOnlyMove(copySquareDestination, gameState);
 }
 
-function movePiece(movementTarget,gameState) {
+function movePiece(movementTarget, gameState) {
   /*primer element posicio inicial*/
   let pieceToMove = movementTarget[0];
   let destination = movementTarget[1];
@@ -322,13 +332,14 @@ function movePiece(movementTarget,gameState) {
 
   refreshPositionPiecesAlive(
     idPieceToMoveWhitoutPiece,
-    destination.id.split("_")[1],gameState
+    destination.id.split("_")[1],
+    gameState
   );
   /*actualitzem l'array moviment-> si al fer push la long es = 2 -> introduim l'array en el movement register
    */
-  refreshMovementWhiteBlackOnlyMove(destination,gameState);
+  refreshMovementWhiteBlackOnlyMove(destination, gameState);
 }
-function killPieceWithoutRefreshHtml(movementTarget,gameState){
+function killPieceWithoutRefreshHtml(movementTarget, gameState) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
@@ -337,10 +348,10 @@ function killPieceWithoutRefreshHtml(movementTarget,gameState){
   const copyPieceKiller = pieceKiller.cloneNode(true);
   const copyPieceToKill = pieceToKill.cloneNode(true);
 
-  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill,gameState);
-  refreshPiecesDead(copyPieceToKill, copyPieceKiller,gameState);
+  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill, gameState);
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller, gameState);
 }
-function killPiece(movementTarget,gameState) {
+function killPiece(movementTarget, gameState) {
   let pieceKiller = movementTarget[0];
   let pieceToKill = movementTarget[1];
 
@@ -364,26 +375,25 @@ function killPiece(movementTarget,gameState) {
     idPieceToKill.substring(idPieceToKill.length - 2);
   pieceToKill.textContent = unicodePieceKiller;
 
-
-  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill,gameState);
-  refreshPiecesDead(copyPieceToKill, copyPieceKiller,gameState);
+  refreshMovementWhiteBlackKill(copyPieceKiller, copyPieceToKill, gameState);
+  refreshPiecesDead(copyPieceToKill, copyPieceKiller, gameState);
 
   /*abans d'actualitzar les peces vives i mortes refrescarem el array que captura el moviment, sino no registraria la peça capturada,
   ja q ja estaria borrada de les pecesAlive*/
 }
 
 /*pieces between*/
-function isMovementValidHandler(start, end, pieceType, pieceType2,gameState) {
+function isMovementValidHandler(start, end, pieceType, pieceType2, gameState) {
   if (pieceType2 === null) {
     /*si es null es un moviment sense captura*/
-    const pieceObject = getPieceObject(start, pieceType,gameState)
+    const pieceObject = getPieceObject(start, pieceType, gameState);
     /*cridar a funcio booleana per veure si hi han peces en mig*/
-    
-    const hasPiecesBetween = hasPieces(start, end,gameState);
-    if(pieceObject.type==="king"){
-      return pieceObject.valid(start, end, hasPiecesBetween,gameState);
+
+    const hasPiecesBetween = hasPieces(start, end, gameState);
+    if (pieceObject.type === "king") {
+      return pieceObject.valid(start, end, hasPiecesBetween, gameState);
     }
-    
+
     return pieceObject.valid(start, end, hasPiecesBetween);
   } else {
     /*si pieceType2 esta definidia-> implica que hi ha un intent de captura
@@ -393,9 +403,9 @@ function isMovementValidHandler(start, end, pieceType, pieceType2,gameState) {
     if (pieceType2 === "king") {
       return false;
     } else {
-      const pieceObject = getPieceObject(start, pieceType,gameState);
-      const hasPiecesBetween = hasPieces(start, end.split("_")[1],gameState);
-      
+      const pieceObject = getPieceObject(start, pieceType, gameState);
+      const hasPiecesBetween = hasPieces(start, end.split("_")[1], gameState);
+
       if (pieceObject.type === "pawn") {
         return pieceObject.valid(
           start,
@@ -404,24 +414,37 @@ function isMovementValidHandler(start, end, pieceType, pieceType2,gameState) {
           true
         );
       } else {
-        if(pieceObject.type==="king"){
-          return pieceObject.valid(start, end, hasPiecesBetween,gameState);
+        if (pieceObject.type === "king") {
+          return pieceObject.valid(start, end, hasPiecesBetween, gameState);
         }
-        return pieceObject.valid(start, end.split("_")[1], hasPiecesBetween,gameState);
+        return pieceObject.valid(
+          start,
+          end.split("_")[1],
+          hasPiecesBetween,
+          gameState
+        );
       }
     }
   }
 }
 function copyArrays(gameState) {
-  gameState.piecesAliveCopy = gameState.piecesAlive.map(piece => piece.clone());
-  gameState.piecesDeadCopy = gameState.piecesDead.map(piece => piece.clone());
-  gameState.movementRegisterCopy = gameState.movementRegister.map(subArr => [...subArr]);
+  gameState.piecesAliveCopy = gameState.piecesAlive.map((piece) =>
+    piece.clone()
+  );
+  gameState.piecesDeadCopy = gameState.piecesDead.map((piece) => piece.clone());
+  gameState.movementRegisterCopy = gameState.movementRegister.map((subArr) => [
+    ...subArr,
+  ]);
   gameState.movementWhiteBlackCopy = [...gameState.movementWhiteBlack];
 }
 
 function pastContentArrays(gameState) {
-  gameState.piecesAlive = gameState.piecesAliveCopy.map(piece => piece.clone());
-  gameState.piecesDead = gameState.piecesDeadCopy.map(piece => piece.clone());
-  gameState.movementRegister = gameState.movementRegisterCopy.map(subArr => [...subArr]);
+  gameState.piecesAlive = gameState.piecesAliveCopy.map((piece) =>
+    piece.clone()
+  );
+  gameState.piecesDead = gameState.piecesDeadCopy.map((piece) => piece.clone());
+  gameState.movementRegister = gameState.movementRegisterCopy.map((subArr) => [
+    ...subArr,
+  ]);
   gameState.movementWhiteBlack = [...gameState.movementWhiteBlackCopy];
 }

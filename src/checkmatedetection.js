@@ -8,6 +8,22 @@ comprovar usant el codi de checkdetection si totes les casselles estan amenaçad
 3)No es pot capturar la/les peces que amenacen al rei
 provar tots els moviments possibles que pot fer en les seues peces, per cada moviment revisar les casselles amenaçades del rei, 
 si hi ha una sense amenaçar es pot lliurar el jaque mate.
+
+
+Explicació a grans trets de l'algoritme: 
+-> després de revisar que totes les posicions estan en jaque
+-> tracem horitzontals, verticals y diagonals des del rei
+-> filtrem les branques: 
+   -> si no es troba cap peça en la branca o si la primera peça trobada és una peça del mateix color descartem la branca
+   -> si la primera peça trobada és una peça del color opost, dos casos:
+      -> si la peça es troba en un eix respecte del cual la peça no pot atacar (ex: una torre mai podrà atacar a una peça en diagonal)
+        es descarta
+      -> si la peça es troba en un eix des d'on té capacitat d'atack, es guarda la peça com a clau en un hash map
+      i els escacs buits des de la seua posicio (la peça atacant) fins al rei com a valor
+-> una vegada amb les branques filtrades, proseguim a atacar les peces atacants
+    -> si després d'atacar la peça atacant el jaquemate continua, passem a altra peça
+    -> si no es pot atacar a la peça provarem a bloquejar els valors, si un d'ells es bloqueja i el jaquemate continua, passem a altra peça
+.... i així fins que trobem un moviment vàlid que evite el jaquemate o fins que es proven totes les combinacions i no s'haja trobat res.
 */
 import { Bishop } from "./piecesobjects/bishop.js";
 import { King } from "./piecesobjects/king.js";
@@ -24,10 +40,14 @@ import {
   rangeDiagonalLetter,
   hasPieces,
 } from "./piecesbetween.js";
-import { isKingCheck} from "./checkdetection.js";
+import { isKingCheck } from "./checkdetection.js";
 import { isMovementValidHandler } from "./main.js";
 import { limits } from "./checkdetection.js";
-export { isCheckMate };
+export {
+  isCheckMate,
+  calculateNearPositions,
+  areAllPositionsChecked,
+};
 function isCheckMate(gameState) {
   //Quan evaluarem la condició de jaquemate?
   //Quan un jugador mou/captura una peça de l'oponent (fa un moviment vàlid)
@@ -48,7 +68,7 @@ function isCheckMate(gameState) {
   const king = gameState.piecesAlive.find(
     (piece) => piece.type === "king" && piece.color === gameState.turn
   );
-//calculem les posicions circumdants
+  //calculem les posicions circumdants
   let closePositionsKing = [];
   closePositionsKing = calculateNearPositions(king.coordinates);
   //ara llevem les posicions que tenen una peça del seu color
@@ -56,10 +76,10 @@ function isCheckMate(gameState) {
     closePositionsKing.forEach((position, index) => {
       if (
         (piece.color === gameState.turn &&
-        piece.type !== 'king' &&
-        piece.coordinates === position)||(piece.color===colorPiecesOpponent&&piece.coordinates===position)
+          piece.type !== "king" &&
+          piece.coordinates === position) ||
+        (piece.color === colorPiecesOpponent && piece.coordinates === position)
       ) {
-        
         //si hi ha alguna peça al seu voltant que siga del color del torn (del rei q estem avaluant el jm) i que no siga rei
         closePositionsKing.splice(index, 1);
       }
@@ -68,16 +88,28 @@ function isCheckMate(gameState) {
   console.log(closePositionsKing);
   //una vegada tinguem l'array de posicions evaluem si en totes les posicions hi ha jaque:
 
-  
-    if (areAllPositionsChecked(piecesOpponent, closePositionsKing,gameState.turn,gameState)) {
-      console.log("totes les circumdants estan en jaque");
-      if (!canStopCheck(copyPiecesAlive, copyOfCopyPiecesAlive, gameState.turn, king,gameState)) {
-        console.log("jaque mate ateos");
-        return true;
-      }
+  if (
+    areAllPositionsChecked(
+      piecesOpponent,
+      closePositionsKing,
+      gameState
+    )
+  ) {
+    console.log("totes les circumdants estan en jaque");
+    if (
+      !canStopCheck(
+        copyPiecesAlive,
+        copyOfCopyPiecesAlive,
+        gameState.turn,
+        king,
+        gameState
+      )
+    ) {
+      console.log("jaque mate ateos");
+      return true;
     }
+  }
 
-  
   return false;
 }
 function calculateNearPositions(kingCoordinates) {
@@ -103,25 +135,40 @@ function calculateNearPositions(kingCoordinates) {
   }
   return positions;
 }
-function areAllPositionsChecked(piecesOpponent, closePositionsKing,turn,gameState) {
+function areAllPositionsChecked(
+  piecesOpponent,
+  closePositionsKing,
+  gameState
+) {
   for (let i = 0; i < closePositionsKing.length; i++) {
-    if (!isCheckedClosePosition(piecesOpponent, closePositionsKing[i],turn,gameState)) {
-//anem recorreguent totes les posicions annexes al rei
-//isCheckedClosePosition retorna true quan el closePosition[i] està afectat, si retorna false, es que no esta afectada, entra
-//a esta condicio i retornem false
-console.log("la posicio: "+closePositionsKing[i]+" no esta amenaçada");
-return false;
-
+    if (
+      !isCheckedClosePosition(
+        piecesOpponent,
+        closePositionsKing[i],
+        gameState
+      )
+    ) {
+      //anem recorreguent totes les posicions annexes al rei
+      //isCheckedClosePosition retorna true quan el closePosition[i] està afectat, si retorna false, es que no esta afectada, entra
+      //a esta condicio i retornem false
+      console.log(
+        "la posicio: " + closePositionsKing[i] + " no esta amenaçada"
+      );
+      return false;
     }
   }
   //si aplega ací es per que en totes les closePositionKing la funcio ha retornat true i per tant no ha entrat en el if
   //retornem true;
-return true;
+  return true;
 }
-function isCheckedClosePosition(piecesOpponent, closePosition,turn,gameState) {
-  return piecesMovementHandler(piecesOpponent, closePosition,turn,gameState);
+function isCheckedClosePosition(
+  piecesOpponent,
+  closePosition,
+  gameState
+) {
+  return piecesMovementHandler(piecesOpponent, closePosition,gameState);
 }
-function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
+function piecesMovementHandler(piecesOpponent, closePosition,gameState) {
   let isPositionChecked = false;
   piecesOpponent.forEach((piece) => {
     switch (piece.type) {
@@ -131,12 +178,14 @@ function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
             traceDiagonalAscendentLeftToRight(
               piece.coordinates,
               1,
-              closePosition,turn,gameState
+              closePosition,
+              gameState
             ) ||
             traceDiagonalAscendentRightToLeft(
               piece.coordinates,
               1,
-              closePosition,turn,gameState
+              closePosition,
+              gameState
             )
           ) {
             isPositionChecked = true;
@@ -146,12 +195,14 @@ function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
             traceDiagonalDescendentLeftToRight(
               piece.coordinates,
               1,
-              closePosition,turn,gameState
+              closePosition,
+              gameState
             ) ||
             traceDiagonalDescendentRightToLeft(
               piece.coordinates,
               1,
-              closePosition,turn,gameState
+              closePosition,
+              gameState
             )
           ) {
             isPositionChecked = true;
@@ -160,30 +211,86 @@ function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
 
         break;
       case "knight":
-        if (tracePositionsKnight(piece.coordinates, closePosition,turn)) {
+        if (tracePositionsKnight(piece.coordinates, closePosition)) {
           isPositionChecked = true;
         }
         break;
       case "bishop":
         if (
-          traceDiagonalAscendentLeftToRight(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceDiagonalAscendentRightToLeft(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceDiagonalDescendentLeftToRight(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceDiagonalDescendentRightToLeft(piece.coordinates,undefined,closePosition,turn,gameState)
+          traceDiagonalAscendentLeftToRight(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalAscendentRightToLeft(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalDescendentLeftToRight(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalDescendentRightToLeft(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          )
         ) {
           isPositionChecked = true;
         }
         break;
       case "queen":
         if (
-          traceDiagonalAscendentLeftToRight(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceDiagonalAscendentRightToLeft(piece.coordinates,undefined,closePosition,turn,gameState)||
-          traceDiagonalDescendentLeftToRight(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceDiagonalDescendentRightToLeft(piece.coordinates,undefined,closePosition,turn,gameState) ||
-          traceVerticalAscendent(piece.coordinates,closePosition,turn,gameState) ||
-          traceVerticalDescendent(piece.coordinates,closePosition,turn,gameState) ||
-          traceHorizontalLeftToRight(piece.coordinates,closePosition,turn,gameState) ||
-          traceHorizontalRightToLeft(piece.coordinates,closePosition,turn,gameState)
+          traceDiagonalAscendentLeftToRight(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalAscendentRightToLeft(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalDescendentLeftToRight(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceDiagonalDescendentRightToLeft(
+            piece.coordinates,
+            undefined,
+            closePosition,
+            gameState
+          ) ||
+          traceVerticalAscendent(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceVerticalDescendent(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceHorizontalLeftToRight(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceHorizontalRightToLeft(
+            piece.coordinates,
+            closePosition,
+            gameState
+          )
         ) {
           isPositionChecked = true;
         }
@@ -191,20 +298,35 @@ function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
         break;
       case "rook":
         if (
-          traceHorizontalLeftToRight(piece.coordinates,closePosition,turn,gameState) ||
-          traceHorizontalRightToLeft(piece.coordinates,closePosition,turn,gameState) ||
-          traceVerticalAscendent(piece.coordinates,closePosition,turn,gameState) ||
-          traceVerticalDescendent(piece.coordinates,closePosition,turn,gameState)
+          traceHorizontalLeftToRight(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceHorizontalRightToLeft(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceVerticalAscendent(
+            piece.coordinates,
+            closePosition,
+            gameState
+          ) ||
+          traceVerticalDescendent(
+            piece.coordinates,
+            closePosition,
+            gameState
+          )
         ) {
           isPositionChecked = true;
         }
         break;
     }
-    
   });
   return isPositionChecked;
 }
-function traceVerticalAscendent(coordinates,closePosition,turn,gameState) {
+function traceVerticalAscendent(coordinates, closePosition,gameState) {
   /*lletra constant numero augmenta*/
   let position = coordinates;
   const letter = position.split("")[0];
@@ -220,9 +342,13 @@ function traceVerticalAscendent(coordinates,closePosition,turn,gameState) {
     verticalAscendentRange.pop();
   }
 
-  return filterOrderSliceAndEvaluate(verticalAscendentRange, closePosition,turn,gameState);
+  return filterOrderSliceAndEvaluate(
+    verticalAscendentRange,
+    closePosition,
+    gameState
+  );
 }
-function traceVerticalDescendent(coordinates,closePosition,turn,gameState) {
+function traceVerticalDescendent(coordinates, closePosition,gameState) {
   //letra constant numero disminueix
   let position = coordinates;
   const letter = position.split("")[0];
@@ -238,9 +364,17 @@ function traceVerticalDescendent(coordinates,closePosition,turn,gameState) {
   if (verticalDescendentRange.length > 0) {
     verticalDescendentRange.pop();
   }
-  return filterOrderSliceAndEvaluate(verticalDescendentRange, closePosition,turn,gameState);
+  return filterOrderSliceAndEvaluate(
+    verticalDescendentRange,
+    closePosition,
+    gameState
+  );
 }
-function traceHorizontalLeftToRight(coordinates,closePosition,turn,gameState) {
+function traceHorizontalLeftToRight(
+  coordinates,
+  closePosition,
+  gameState
+) {
   //num constant lletra augmenta
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -256,9 +390,17 @@ function traceHorizontalLeftToRight(coordinates,closePosition,turn,gameState) {
   if (horizontalLeftToRightRange.length > 0) {
     horizontalLeftToRightRange.pop();
   }
-  return filterOrderSliceAndEvaluate(horizontalLeftToRightRange, closePosition,turn,gameState);
+  return filterOrderSliceAndEvaluate(
+    horizontalLeftToRightRange,
+    closePosition,
+    gameState
+  );
 }
-function traceHorizontalRightToLeft(coordinates,closePosition,turn,gameState) {
+function traceHorizontalRightToLeft(
+  coordinates,
+  closePosition,
+  gameState
+) {
   //num constant lletra disminueix
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -274,9 +416,18 @@ function traceHorizontalRightToLeft(coordinates,closePosition,turn,gameState) {
   if (horizontalRightToLeftRange.length > 0) {
     horizontalRightToLeftRange.pop();
   }
-  return filterOrderSliceAndEvaluate(horizontalRightToLeftRange, closePosition,turn,gameState);
+  return filterOrderSliceAndEvaluate(
+    horizontalRightToLeftRange,
+    closePosition,
+    gameState
+  );
 }
-function traceDiagonalAscendentLeftToRight(coordinates, pawn, closePosition,turn,gameState) {
+function traceDiagonalAscendentLeftToRight(
+  coordinates,
+  pawn,
+  closePosition,
+  gameState
+) {
   //el tema del control del jaque amb peons el controlarem a ma i iau
   //lletra ++ num ++
   let position = coordinates;
@@ -297,7 +448,8 @@ function traceDiagonalAscendentLeftToRight(coordinates, pawn, closePosition,turn
     }
     return filterOrderSliceAndEvaluate(
       diagonalAscendentLeftToRight,
-      closePosition,turn,gameState
+      closePosition,
+      gameState
     );
   }
   ++letter;
@@ -305,7 +457,12 @@ function traceDiagonalAscendentLeftToRight(coordinates, pawn, closePosition,turn
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === closePosition;
 }
-function traceDiagonalAscendentRightToLeft(coordinates, pawn, closePosition,turn,gameState) {
+function traceDiagonalAscendentRightToLeft(
+  coordinates,
+  pawn,
+  closePosition,
+  gameState
+) {
   //lletra -- num ++
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -325,7 +482,8 @@ function traceDiagonalAscendentRightToLeft(coordinates, pawn, closePosition,turn
     }
     return filterOrderSliceAndEvaluate(
       diagonalAscendentRightToLeft,
-      closePosition,turn,gameState
+      closePosition,
+      gameState
     );
   }
   --letter;
@@ -333,7 +491,12 @@ function traceDiagonalAscendentRightToLeft(coordinates, pawn, closePosition,turn
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === closePosition;
 }
-function traceDiagonalDescendentLeftToRight(coordinates, pawn, closePosition,turn,gameState) {
+function traceDiagonalDescendentLeftToRight(
+  coordinates,
+  pawn,
+  closePosition,
+  gameState
+) {
   //lletra++ num --
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -353,7 +516,8 @@ function traceDiagonalDescendentLeftToRight(coordinates, pawn, closePosition,tur
     }
     return filterOrderSliceAndEvaluate(
       diagonalDescendentLeftToRight,
-      closePosition,turn,gameState
+      closePosition,
+      gameState
     );
   }
   ++letter;
@@ -361,7 +525,12 @@ function traceDiagonalDescendentLeftToRight(coordinates, pawn, closePosition,tur
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === closePosition;
 }
-function traceDiagonalDescendentRightToLeft(coordinates, pawn, closePosition,turn,gameState) {
+function traceDiagonalDescendentRightToLeft(
+  coordinates,
+  pawn,
+  closePosition,
+  gameState
+) {
   //lletra -- num --
   let position = coordinates;
   let letter = position.split("")[0].charCodeAt(0);
@@ -381,7 +550,8 @@ function traceDiagonalDescendentRightToLeft(coordinates, pawn, closePosition,tur
     }
     return filterOrderSliceAndEvaluate(
       diagonalDescendentRightToLeft,
-      closePosition,turn,gameState
+      closePosition,
+      gameState
     );
   }
   --letter;
@@ -389,7 +559,7 @@ function traceDiagonalDescendentRightToLeft(coordinates, pawn, closePosition,tur
   let endPosition = String.fromCharCode(letter) + num;
   return endPosition === closePosition;
 }
-function tracePositionsKnight(coordinates, closePosition,turn) {
+function tracePositionsKnight(coordinates, closePosition) {
   let startLetter = coordinates.split("")[0].charCodeAt(0);
   let startNumber = parseInt(coordinates.split("")[1]);
   let possibleMovements = [];
@@ -430,8 +600,8 @@ function tracePositionsKnight(coordinates, closePosition,turn) {
   return possibleMovements.includes(closePosition);
 }
 //aci
-function filterOrderSliceAndEvaluate(range, closePosition, turn,gameState) {
-  console.log(range+" "+closePosition);
+function filterOrderSliceAndEvaluate(range, closePosition,gameState) {
+  console.log(range + " " + closePosition);
   if (range.length > 0) {
     //Si el rang traçat per la peça és major a 1
     //Agafem totes les peces que coincideixen amb les posicions del rang
@@ -454,29 +624,24 @@ function filterOrderSliceAndEvaluate(range, closePosition, turn,gameState) {
       const indexToCut = range.indexOf(piecesInRangeSorted[0].coordinates);
       if (indexToCut !== -1) {
         const slicedArray = range.slice(0, indexToCut + 1);
-        console.log("Array capat: "+slicedArray.toString());
-        range = [...slicedArray]; 
+        console.log("Array capat: " + slicedArray.toString());
+        range = [...slicedArray];
       }
-      //si la primera peça trobada és el rei, doncs l'esta amenaçant i és jaque
-      
-
-      /*if (piecesInRangeSorted[0].type === "king" && piecesInRangeSorted[0].color === turn) {
-        console.log("Jaque");
-        return true;
-      }*/
-      //si no, vegem si alguna de les posicions des de l'inicial fins la final es correspon amb la closePosition
-      //si es així una posicio circumdant al rei esta amenaçada
+      //si alguna de les posicions des de l'inicial fins la final es correspon amb la closePosition
+      //una posicio circumdant al rei esta amenaçada
     }
     return range.includes(closePosition);
-   // console.log("El rang inclou una close position" + range.includes(closePosition)+" close POSITION: "+closePosition);
-
-
-    
   }
 
   return false;
 }
-function canStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king,gameState) {
+function canStopCheck(
+  CopyPiecesAlive,
+  copyOfCopyPiecesAlive,
+  turn,
+  king,
+  gameState
+) {
   /*estava pensant en fer-ho a base de força bruta pero ho veig terrible*/
   /*
     2)quines son les caselles que haurem de bloquejar? si es que es pot escapar del jaque mate...
@@ -497,7 +662,9 @@ function canStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king,gameSta
     traceDiagonalAscendentRightToLeftRange(kingPosition);
   let diagonalDescendentLeftToRightRange =
     traceDiagonalDescendentLeftToRightRange(kingPosition);
-    console.log("Diagonal descendent left to right "+ diagonalDescendentLeftToRightRange);
+  console.log(
+    "Diagonal descendent left to right " + diagonalDescendentLeftToRightRange
+  );
   let diagonalDescendentRightToLeftRange =
     traceDiagonalDescendentRightToLeftRange(kingPosition);
   let positionsKnightRange = tracePositionsKnightRange(kingPosition);
@@ -540,7 +707,7 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     kingPosition,
     mapPieceRange
   );
-  console.log("el turno es"+turn);
+  console.log("el turno es" + turn);
   if (turn === "black") {
     console.log("entra");
     /*el peo amenaçador serà el blanc i podrà amenaçar en diagonal ascendent*/
@@ -637,7 +804,8 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     copyOfCopyPiecesAlive,
     piecesColorTurn,
     mapPieceRange,
-    king,gameState
+    king,
+    gameState
   );
 }
 
@@ -646,7 +814,8 @@ function checkMateValidatorIterator(
   copyOfCopyPiecesAlive,
   piecesColorTurn,
   mapPieceRange,
-  king,gameState
+  king,
+  gameState
 ) {
   for (const pieceAttacker of mapPieceRange.keys()) {
     let goBlock = true;
@@ -657,17 +826,26 @@ function checkMateValidatorIterator(
       pieceAttacker.color +
       "_" +
       pieceAttacker.coordinates;
-      console.log("Soc l'amenaça "+pieceAttacker.type+" en posicio "+pieceAttacker.coordinates);
+    console.log(
+      "Soc l'amenaça " +
+        pieceAttacker.type +
+        " en posicio " +
+        pieceAttacker.coordinates
+    );
     for (let i = 0; i < piecesColorTurn.length; i++) {
       //start
       let start = piecesColorTurn[i].coordinates;
       let pieceType = piecesColorTurn[i].type;
-      console.log("Soc la possible solucio "+pieceType+" en posicio "+start);
+      console.log(
+        "Soc la possible solucio " + pieceType + " en posicio " + start
+      );
       //isMovementValidHandler(start, end, pieceType, pieceType2)
       console.log(copyOfCopyPiecesAlive);
-      if (isMovementValidHandler(start, end, pieceType, pieceType2,gameState)) {
+      if (
+        isMovementValidHandler(start, end, pieceType, pieceType2, gameState)
+      ) {
         console.log("moviment valid");
-        
+
         //refresquem el array CopyOfCopyPiecesAlive
         //açò es captura
         //si el moviment es vàlid refresquem les peces mortes
@@ -707,9 +885,9 @@ function checkMateValidatorIterator(
           let start = piecesColorTurn[i].coordinates;
           let pieceType = piecesColorTurn[i].type;
 
-          if (isMovementValidHandler(start, end, pieceType,null,gameState)) {
+          if (isMovementValidHandler(start, end, pieceType, null, gameState)) {
             refreshPositionPiecesAlive(start, end, copyOfCopyPiecesAlive);
-            if (!isKingCheck(gameState.turn,  copyOfCopyPiecesAlive)) {
+            if (!isKingCheck(gameState.turn, copyOfCopyPiecesAlive)) {
               return true;
             } else {
               //si encara continua en jaque mate
@@ -721,7 +899,7 @@ function checkMateValidatorIterator(
             }
           }
           copyOfCopyPiecesAlive = CopyPiecesAlive.map((piece) => piece.clone());
-          if(stop){
+          if (stop) {
             break;
           }
         }
@@ -789,7 +967,7 @@ function relevantOrIrrelevantBranch(
     findIndex = CopyPiecesAlive.findIndex((piece, index) => {
       return piece.coordinates === position;
     });
-  
+
     if (findIndex !== -1) {
       break;
     }
@@ -805,7 +983,7 @@ function relevantOrIrrelevantBranch(
     if (potentialAttackers.includes(pieceFind.type)) {
       //haurem de veure si es peo y si aquest constitueix una amenaça
       //quan constitueix una amenaça? quan la diferencia absoluta entre el rei i el peo és de 1 o 2
-      if ((pieceFind.type === "pawn")) {
+      if (pieceFind.type === "pawn") {
         let numKing = parseInt(kingPosition.split("")[1]);
         let pawnNumber = parseInt(pieceFind.coordinates.split("")[1]);
 
@@ -813,18 +991,27 @@ function relevantOrIrrelevantBranch(
           //ataca ascendentment
           //si el rei està 1 o 2 per damunt del peo, constituirà una amenaça
           if (numKing - pawnNumber === 1 || numKing - pawnNumber === 2) {
-            mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
+            mapPieceRange.set(
+              pieceFind,
+              positions.slice(0, positions.indexOf(pieceFind.coordinates))
+            );
             return;
           }
         } else {
           if (numKing - pawnNumber === -1 || numKing - pawnNumber === -2) {
-            mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
+            mapPieceRange.set(
+              pieceFind,
+              positions.slice(0, positions.indexOf(pieceFind.coordinates))
+            );
             return;
           }
         }
       } else {
         //si hi ha algujna peça de color opost i apart ataca, capem el rang i l'incloem
-        mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
+        mapPieceRange.set(
+          pieceFind,
+          positions.slice(0, positions.indexOf(pieceFind.coordinates))
+        );
         return;
       }
     }
