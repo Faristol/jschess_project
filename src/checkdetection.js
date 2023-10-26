@@ -48,6 +48,8 @@ function isKingCheck(turn,piecesAlive) {
   const king = piecesAlive.find(
     (piece) => piece.type === "king" && piece.color === turn
   );
+  console.log("El rey "+king);
+  console.log("El color "+turn);
   const piecesOpponent = [];
   piecesAlive.forEach((piece) => {
     if (piece.color === colorPiecesOpponent) {

@@ -24,6 +24,7 @@ import {
   rangeDiagonalLetter,
   hasPieces,
 } from "./piecesbetween.js";
+import { isKingCheck} from "./checkdetection.js";
 import { isMovementValidHandler } from "./main.js";
 import { limits } from "./checkdetection.js";
 export { isCheckMate };
@@ -32,7 +33,9 @@ function isCheckMate(gameState) {
   //Quan un jugador mou/captura una peça de l'oponent (fa un moviment vàlid)
   //en el mateix moment revisem si el moviment resultant és un jaque mate, no ens esperem a que canvie de torn...
   const copyPiecesAlive = gameState.piecesAlive.map((piece) => piece.clone());
+  console.log(copyPiecesAlive.toString());
   let copyOfCopyPiecesAlive = copyPiecesAlive.map((piece) => piece.clone());
+  console.log(copyOfCopyPiecesAlive.toString());
   const colorPiecesOpponent = gameState.turn === "white" ? "black" : "white";
   const piecesOpponent = [];
   //agafem totes les peces de l'oponent
@@ -68,7 +71,7 @@ function isCheckMate(gameState) {
   
     if (areAllPositionsChecked(piecesOpponent, closePositionsKing,gameState.turn,gameState)) {
       console.log("totes les circumdants estan en jaque");
-      if (!canStopCheck(copyPiecesAlive, copyOfCopyPiecesAlive, gameState.turn, king)) {
+      if (!canStopCheck(copyPiecesAlive, copyOfCopyPiecesAlive, gameState.turn, king,gameState)) {
         console.log("jaque mate ateos");
         return true;
       }
@@ -197,6 +200,7 @@ function piecesMovementHandler(piecesOpponent, closePosition,turn,gameState) {
         }
         break;
     }
+    
   });
   return isPositionChecked;
 }
@@ -454,23 +458,25 @@ function filterOrderSliceAndEvaluate(range, closePosition, turn,gameState) {
         range = [...slicedArray]; 
       }
       //si la primera peça trobada és el rei, doncs l'esta amenaçant i és jaque
+      
 
-      if (piecesInRangeSorted[0].type === "king" && piecesInRangeSorted[0].color === turn) {
+      /*if (piecesInRangeSorted[0].type === "king" && piecesInRangeSorted[0].color === turn) {
         console.log("Jaque");
         return true;
-      }
+      }*/
       //si no, vegem si alguna de les posicions des de l'inicial fins la final es correspon amb la closePosition
       //si es així una posicio circumdant al rei esta amenaçada
     }
-    console.log("El rang inclou una close position" + range.includes(closePosition)+" close POSITION: "+closePosition);
-
-
     return range.includes(closePosition);
+   // console.log("El rang inclou una close position" + range.includes(closePosition)+" close POSITION: "+closePosition);
+
+
+    
   }
 
   return false;
 }
-function canStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king) {
+function canStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king,gameState) {
   /*estava pensant en fer-ho a base de força bruta pero ho veig terrible*/
   /*
     2)quines son les caselles que haurem de bloquejar? si es que es pot escapar del jaque mate...
@@ -491,6 +497,7 @@ function canStopCheck(CopyPiecesAlive, copyOfCopyPiecesAlive, turn, king) {
     traceDiagonalAscendentRightToLeftRange(kingPosition);
   let diagonalDescendentLeftToRightRange =
     traceDiagonalDescendentLeftToRightRange(kingPosition);
+    console.log("Diagonal descendent left to right "+ diagonalDescendentLeftToRightRange);
   let diagonalDescendentRightToLeftRange =
     traceDiagonalDescendentRightToLeftRange(kingPosition);
   let positionsKnightRange = tracePositionsKnightRange(kingPosition);
@@ -533,7 +540,9 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     kingPosition,
     mapPieceRange
   );
+  console.log("el turno es"+turn);
   if (turn === "black") {
+    console.log("entra");
     /*el peo amenaçador serà el blanc i podrà amenaçar en diagonal ascendent*/
     relevantOrIrrelevantBranch(
       diagonalDescendentLeftToRightRange,
@@ -569,6 +578,7 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     );
   } else {
     /*el peo amenaçador serà el negre i podrà amenaçar en diagonal descendent*/
+    console.log("entra");
     relevantOrIrrelevantBranch(
       diagonalDescendentLeftToRightRange,
       ["queen", "bishop", "pawn"],
@@ -612,6 +622,7 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     kingPosition,
     mapPieceRange
   );
+  console.log(mapPieceRange);
   //modus operandi
   //1) pillar les peces del color del torn (totes)
   let piecesColorTurn = [];
@@ -626,7 +637,7 @@ si en la branca no hi ha cap peça no representa cap amenaça. En cas de detecta
     copyOfCopyPiecesAlive,
     piecesColorTurn,
     mapPieceRange,
-    king
+    king,gameState
   );
 }
 
@@ -635,9 +646,9 @@ function checkMateValidatorIterator(
   copyOfCopyPiecesAlive,
   piecesColorTurn,
   mapPieceRange,
-  king
+  king,gameState
 ) {
-  for (const pieceAttacker of mapPieceRange) {
+  for (const pieceAttacker of mapPieceRange.keys()) {
     let goBlock = true;
     //end
     let pieceType2 = pieceAttacker.type;
@@ -646,12 +657,17 @@ function checkMateValidatorIterator(
       pieceAttacker.color +
       "_" +
       pieceAttacker.coordinates;
+      console.log("Soc l'amenaça "+pieceAttacker.type+" en posicio "+pieceAttacker.coordinates);
     for (let i = 0; i < piecesColorTurn.length; i++) {
       //start
       let start = piecesColorTurn[i].coordinates;
       let pieceType = piecesColorTurn[i].type;
+      console.log("Soc la possible solucio "+pieceType+" en posicio "+start);
       //isMovementValidHandler(start, end, pieceType, pieceType2)
+      console.log(copyOfCopyPiecesAlive);
       if (isMovementValidHandler(start, end, pieceType, pieceType2,gameState)) {
+        console.log("moviment valid");
+        
         //refresquem el array CopyOfCopyPiecesAlive
         //açò es captura
         //si el moviment es vàlid refresquem les peces mortes
@@ -661,7 +677,7 @@ function checkMateValidatorIterator(
           copyOfCopyPiecesAlive
         );
         //vegem si permaneix el jaque:
-        if (!isKingCheck(piecesColorTurn, copyOfCopyPiecesAlive)) {
+        if (!isKingCheck(gameState.turn, copyOfCopyPiecesAlive)) {
           //si no està en jaque-> no és jaque mate
           //retornem true
           return true;
@@ -684,15 +700,16 @@ function checkMateValidatorIterator(
       let stop = false;
 
       let positionsOfInfluencePieceAttacker = mapPieceRange.get(pieceAttacker);
+      console.log(positionsOfInfluencePieceAttacker);
       for (const positionOfInfluence of positionsOfInfluencePieceAttacker) {
         let end = positionOfInfluence;
         for (let i = 0; i < piecesColorTurn.length; i++) {
           let start = piecesColorTurn[i].coordinates;
-          let pieceType = piecesColorTurn[i].coordinates;
+          let pieceType = piecesColorTurn[i].type;
 
-          if (isMovementValidHandler(start, end, pieceType)) {
+          if (isMovementValidHandler(start, end, pieceType,null,gameState)) {
             refreshPositionPiecesAlive(start, end, copyOfCopyPiecesAlive);
-            if (!isKingCheck(piecesColorTurn, copyOfCopyPiecesAlive)) {
+            if (!isKingCheck(gameState.turn,  copyOfCopyPiecesAlive)) {
               return true;
             } else {
               //si encara continua en jaque mate
@@ -767,23 +784,28 @@ function relevantOrIrrelevantBranch(
     return;
   }
   let findIndex;
-  positions.forEach((position) => {
-    findIndex = CopyPiecesAlive.findIndex((piece) => {
-      //pillem la primera ocurrencia
+
+  for (const position of positions) {
+    findIndex = CopyPiecesAlive.findIndex((piece, index) => {
       return piece.coordinates === position;
     });
-  });
+  
+    if (findIndex !== -1) {
+      break;
+    }
+  }
   if (findIndex === -1) {
     //sino s'ha trobat cap peça la branca es irrellevant i no clavarem elements a clau-valor
     return;
   }
   let pieceFind = { ...CopyPiecesAlive[findIndex] };
+  console.log(pieceFind);
   if (pieceFind.color !== turn) {
     //s'ha trobat una peça amenaçant
     if (potentialAttackers.includes(pieceFind.type)) {
       //haurem de veure si es peo y si aquest constitueix una amenaça
       //quan constitueix una amenaça? quan la diferencia absoluta entre el rei i el peo és de 1 o 2
-      if ((pieceFind.type = "pawn")) {
+      if ((pieceFind.type === "pawn")) {
         let numKing = parseInt(kingPosition.split("")[1]);
         let pawnNumber = parseInt(pieceFind.coordinates.split("")[1]);
 
@@ -791,18 +813,18 @@ function relevantOrIrrelevantBranch(
           //ataca ascendentment
           //si el rei està 1 o 2 per damunt del peo, constituirà una amenaça
           if (numKing - pawnNumber === 1 || numKing - pawnNumber === 2) {
-            mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+            mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
             return;
           }
         } else {
           if (numKing - pawnNumber === -1 || numKing - pawnNumber === -2) {
-            mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+            mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
             return;
           }
         }
       } else {
         //si hi ha algujna peça de color opost i apart ataca, capem el rang i l'incloem
-        mapPieceRange.set(pieceFind, positions.splice(0, findIndex));
+        mapPieceRange.set(pieceFind, positions.slice(0, positions.indexOf(pieceFind.coordinates)));
         return;
       }
     }
