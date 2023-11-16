@@ -61,39 +61,73 @@ function staleMate(
   //1)agafar posicions concentriques
   //2)filtrar i quedarse amb caselles buides o amb peces del color opost
   let concentricRings = [];
-  for(let i=1;i<=8;i++){
-    concentricRings = generateConcentricRings(king.coordinates,i);
+  for (let i = 1; i <= 8; i++) {
+    concentricRings = generateConcentricRings(king.coordinates, i);
   }
+  console.log(concentricRings);
+  //ara de cada array ring, s'han de llevar aquelles posicions que sóc ocupades per peces del mateix color al rei avaluat
+  //el que farem serà filtrar les posicions que són ocupades per peces de color opost
+
+  concentricRings.forEach((ring) => {
+    const coordinatesToRemove = [];
+    ring.forEach((posicio, index) => {
+      gameState.piecesAlive.forEach((escac) => {
+        if (posicio === escac.coordinates && escac.color === gameState.turn) {
+          //guardem les coordenades
+          coordinatesToRemove.push(index);
+        }
+      });
+    });
+    // Elimina las coordenadas del concentric ring
+    coordinatesToRemove.forEach((index) => {
+      ring.splice(index, 1);
+    });
+    ring.forEach((posicio, index) => {
+      gameState.piecesAlive.forEach((escac) => {
+        if (posicio === escac.coordinates) {
+          // Reemplaza la posición en el concentric ring con la del gameState
+          ring[index] = escac;
+        }
+      });
+    });
+  });
+  //ARA, per cada posició/peça en el concentricRings, haurem de moure/atacar la posició/peça i, seguidament veure si el rei es pot moure a alguna
+  //cassella adjacent, si es pot moure, return false, si arriba al final de l'array concentricRings retrun true. 
+ iterationStaleMate();
   
+
   return false;
 }
-  function generateConcentricRings(kingPosition, maxDistance) {
-    const [file, rank] = kingPosition.split(''); 
-    const concentricRing = [];
-  
-    for (let distance = 1; distance <= maxDistance; distance++) {
-      const ring = [];
-  
-      for (let dx = -distance; dx <= distance; dx++) {
-        for (let dy = -distance; dy <= distance; dy++) {
-          if (Math.abs(dx) === distance || Math.abs(dy) === distance) {
-            const newFile = String.fromCharCode(file.charCodeAt(0) + dx);
-            const newRank = parseInt(rank, 10) + dy;
-            const newPosition = newFile + newRank;
-  
-            if (
-              newFile >= 'a' && newFile <= 'h' &&
-              newRank >= 1 && newRank <= 8
-            ) {
-              ring.push(newPosition);
-            }
+function generateConcentricRings(kingPosition, maxDistance) {
+  const [file, rank] = kingPosition.split("");
+  const concentricRing = [];
+
+  for (let distance = 1; distance <= maxDistance; distance++) {
+    const ring = [];
+
+    for (let dx = -distance; dx <= distance; dx++) {
+      for (let dy = -distance; dy <= distance; dy++) {
+        if (Math.abs(dx) === distance || Math.abs(dy) === distance) {
+          const newFile = String.fromCharCode(file.charCodeAt(0) + dx);
+          const newRank = parseInt(rank, 10) + dy;
+          const newPosition = newFile + newRank;
+
+          if (
+            newFile >= "a" &&
+            newFile <= "h" &&
+            newRank >= 1 &&
+            newRank <= 8
+          ) {
+            ring.push(newPosition);
           }
         }
       }
-  
-      concentricRing.push(ring);
     }
-    return concentricRing;
-  
+
+    concentricRing.push(ring);
   }
-  
+  return concentricRing;
+}
+function iterationStaleMate(){
+
+}
