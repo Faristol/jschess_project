@@ -16,11 +16,13 @@ class GameState{
   },
  
   this.turn= "white",
-  this.stalemate= "false",
-  this.checkmate= "false",
-  this.check= "false",
-  this.chessCastling= "false",
-  this.kingMove= "false"
+  this.stalemate= false,
+  this.checkmate= false,
+  this.check= false,
+  this.chessCastlingWhite= false,
+  this.chessCastlingBlack=false,
+  this.kingMoveWhite= false,
+  this.kingMoveBlack=false
     }
     
 }

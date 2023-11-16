@@ -26,6 +26,7 @@ import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
 import { isStaleMate } from "./stalematedetection.js";
+import { supaRequest,insertNewGame, SUPABASE_KEY} from "./services/http.js";
 export { isMovementValidHandler };
 document.addEventListener("DOMContentLoaded", start);
 function start() {
@@ -35,6 +36,7 @@ function start() {
   let movementTarget = [];
 
   createTablePieces(gameState, movementTarget);
+  insertNewGame(SUPABASE_KEY,gameState);
   /*game(gameState,movementTarget);*/
 }
 function createTablePieces(gameState, movementTarget) {
@@ -97,11 +99,6 @@ function createTablePieces(gameState, movementTarget) {
         let index = gameState.piecesAlive.length - 1;
 
         let unicodeValuePiece = gameState.piecesAlive[index].unicodePiece;
-        /*
-            let image = document.createElement("img");
-            image.classList.add("piece");
-            image.src = srcImage;
-            image.id = column+row;*/
         square.id =
           gameState.piecesAlive[index].type +
           gameState.piecesAlive[index].color +
