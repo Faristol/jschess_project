@@ -1,4 +1,21 @@
-export { insertNewGame,supaRequest, SUPABASE_KEY};
+export {
+  insertNewGame,
+  supaRequest,
+  SUPABASE_KEY,
+  saveGameId,
+  getGameId,
+  updateGameInSupaBase,
+  getGameData,
+  updateGameAndObjectsInGame
+};
+import { GameState } from "../gameState.js";
+import { Bishop } from "../piecesobjects/bishop.js";
+import { King } from "../piecesobjects/king.js";
+import { Knight } from "../piecesobjects/knight.js";
+import { Pawn } from "../piecesobjects/pawn.js";
+import { PieceFather } from "../piecesobjects/piecefather.js";
+import { Queen } from "../piecesobjects/queen.js";
+import { Rook } from "../piecesobjects/rook.js";
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnamR3cGtodm1iamRuY2Z2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk4NzI4MDgsImV4cCI6MjAxNTQ0ODgwOH0.D096jzje7lSbJs3dc9ZOEA1Zvt4_lqsAHulejU-M3FY";
 const headers = {
@@ -25,29 +42,110 @@ async function supaRequest(url, method, headers, body) {
 }
 
 async function insertNewGame(token, data) {
-  const url = 'https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game';
+  const url = "https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game";
   const headersAux = {
     ...headers,
     Authorization: `Bearer ${token}`,
     Prefer: "return=representation",
   };
-  const dataGame = {game : data};
+  const dataGame = { game: data };
   const response = await supaRequest(url, "post", headersAux, dataGame);
   console.log(response);
   const resolvedId = response[0]?.id;
   saveGameId(resolvedId);
   return response;
 }
-function saveGameId(id){
-  localStorage.setItem("gameId",id);
+function saveGameId(id) {
+  localStorage.setItem("gameId", id);
 }
-function getGameId(){
-  localStorage.getItem("gameId");
+function getGameId() {
+  return localStorage.getItem("gameId");
 }
-async function updateGame() {
+async function updateGameInSupaBase(data, id) {
+  const url = `https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game?id=eq.${id}`;
+  const headersAux = {
+    ...headers,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+    Prefer: "return=minimal",
+  };
+  const dataGame = { game: data };
+  const response = await supaRequest(url, "PATCH", headersAux, dataGame);
+  console.log(response);
 
+  return response;
 }
-async function getGameData() {
+async function getGameData(id) {
+  try {
+    const response = await fetch(
+      `https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game?id=eq.${id}&select=game`,
+      {
+        headers: {
+          apiKey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
 
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data[0].game;
+  } catch (error) {
+    console.error("Error en la solicitud:", error.message);
+    return null;
+  }
 }
+async function updateGameAndObjectsInGame(gameState, gameId) {
+  const updatedGameData = await getGameData(gameId);
+  console.log(updatedGameData);
+  gameState = new GameState();
 
+  Object.keys(updatedGameData).forEach((key) => {
+    console.log(key);
+    if (
+      ![
+        "piecesAlive",
+        "piecesAliveCopy",
+        "piecesDead",
+        "piecesDeadCopy",
+      ].includes(key)
+    ) {
+      if(key instanceof Array){
+        gameState[key] = [...updatedGameData[key]];
+      } else{
+        gameState[key] = updatedGameData[key];
+      }
+      
+    } else {
+      gameState[key] = updatedGameData[key].map((pieceData) => {
+        let piece;
+        switch (pieceData.type) {
+          case "Bishop":
+            piece = new Bishop();
+            break;
+          case "King":
+            piece = new King();
+            break;
+          case "Knight":
+            piece = new Knight();
+            break;
+          case "Pawn":
+            piece = new Pawn();
+            break;
+          case "Queen":
+            piece = new Queen();
+            break;
+          case "Rook":
+            piece = new Rook();
+            break;
+        }
+        if(piece instanceof PieceFather){
+          Object.assign(piece, pieceData);
+        return piece;
+        }
+        
+      });
+    }
+  });
+}

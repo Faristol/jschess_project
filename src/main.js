@@ -26,17 +26,17 @@ import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
 import { isStaleMate } from "./stalematedetection.js";
-import { supaRequest,insertNewGame, SUPABASE_KEY} from "./services/http.js";
+import { supaRequest,insertNewGame, SUPABASE_KEY, getGameId,updateGameInSupaBase,getGameData,updateGameAndObjectsInGame } from "./services/http.js";
 export { isMovementValidHandler };
 document.addEventListener("DOMContentLoaded", start);
-function start() {
+async function start() {
   /*create table and put pieces*/
   //creem el gameState y el movementTarget
   let gameState = new GameState();
   let movementTarget = [];
 
   createTablePieces(gameState, movementTarget);
-  insertNewGame(SUPABASE_KEY,gameState);
+  await insertNewGame(SUPABASE_KEY,gameState);
   /*game(gameState,movementTarget);*/
 }
 function createTablePieces(gameState, movementTarget) {
@@ -124,8 +124,9 @@ no siga la mateixa posicio a l'actual
 */
 /*de moment sols posarem dos condicions-> destí no siga el mateix a la posició actual
 i que no hi haja cap peça seua en la casella destí*/
-function captureAction(e, gameState, movementTarget) {
+async function captureAction(e, gameState, movementTarget) {
   console.log(movementTarget.length);
+  console.log(gameState);
   e.stopPropagation();
   let element = e.target;
   /*si l'array capturador d'events esta buit i a més el contingut de la casella es diferent a 0, bingo, a ha marcat una peça, 
@@ -187,6 +188,10 @@ function captureAction(e, gameState, movementTarget) {
           pastContentArrays(gameState);
           movePiece(movementTarget, gameState);
           changeTurn(gameState);
+
+          await updateGameInSupaBase(gameState,getGameId());
+          await updateGameAndObjectsInGame(gameState,getGameId());
+
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
           if (isCheckMate(gameState)) {
             gameState.start = false;
@@ -199,6 +204,8 @@ function captureAction(e, gameState, movementTarget) {
           }
         } else {
           pastContentArrays(gameState);
+          await updateGameInSupaBase(gameState,getGameId());
+          await updateGameAndObjectsInGame(gameState,getGameId());
         }
       }
       movementTarget.splice(0, movementTarget.length);
@@ -253,6 +260,8 @@ function captureAction(e, gameState, movementTarget) {
             playRandomAttackSound();
             killPiece(movementTarget, gameState);
             changeTurn(gameState);
+            await updateGameInSupaBase(gameState,getGameId());
+            await updateGameAndObjectsInGame(gameState,getGameId());
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
               gameState.start = false;
@@ -264,6 +273,8 @@ function captureAction(e, gameState, movementTarget) {
             }
           } else {
             pastContentArrays(gameState);
+            await updateGameInSupaBase(gameState,getGameId());
+            await updateGameAndObjectsInGame(gameState,getGameId());
           }
         }
         movementTarget.splice(0, movementTarget.length);
