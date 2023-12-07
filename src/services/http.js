@@ -70,7 +70,6 @@ async function updateGameInSupaBase(data, id) {
   };
   const dataGame = { game: data };
   const response = await supaRequest(url, "PATCH", headersAux, dataGame);
-  console.log(response);
 
   return response;
 }
@@ -92,14 +91,13 @@ async function getGameData(id) {
     const data = await response.json();
     return data[0].game;
   } catch (error) {
-    console.error("Error en la solicitud:", error.message);
     return null;
   }
 }
-async function updateGameAndObjectsInGame(gameState, gameId) {
+async function updateGameAndObjectsInGame(gameState,gameId) {
   const updatedGameData = await getGameData(gameId);
   console.log(updatedGameData);
-  gameState = new GameState();
+ 
 
   Object.keys(updatedGameData).forEach((key) => {
     console.log(key);
@@ -118,29 +116,32 @@ async function updateGameAndObjectsInGame(gameState, gameId) {
       }
       
     } else {
+      console.log("entra");
       gameState[key] = updatedGameData[key].map((pieceData) => {
+        console.log(pieceData);
         let piece;
         switch (pieceData.type) {
-          case "Bishop":
+          case "bishop":
             piece = new Bishop();
             break;
-          case "King":
+          case "king":
             piece = new King();
             break;
-          case "Knight":
+          case "knight":
             piece = new Knight();
             break;
-          case "Pawn":
+          case "pawn":
             piece = new Pawn();
             break;
-          case "Queen":
+          case "queen":
             piece = new Queen();
             break;
-          case "Rook":
+          case "rook":
             piece = new Rook();
             break;
         }
         if(piece instanceof PieceFather){
+          console.log("piecedata"+pieceData);
           Object.assign(piece, pieceData);
         return piece;
         }
@@ -148,4 +149,6 @@ async function updateGameAndObjectsInGame(gameState, gameId) {
       });
     }
   });
+  console.log(gameState.piecesAlive);
+  return gameState;
 }

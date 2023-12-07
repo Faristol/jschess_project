@@ -2,18 +2,18 @@ export { PieceFather };
 class PieceFather {
   static mapPiecesUnicode = new Map();
   static initializeMapPiecesUnicode() {
-    this.mapPiecesUnicode.set("kingwhite", "\u2654");
-    this.mapPiecesUnicode.set("kingblack", "\u265A");
-    this.mapPiecesUnicode.set("queenwhite", "\u2655");
-    this.mapPiecesUnicode.set("queenblack", "\u265B");
-    this.mapPiecesUnicode.set("rookwhite", "\u2656");
-    this.mapPiecesUnicode.set("rookblack", "\u265C");
-    this.mapPiecesUnicode.set("bishopwhite", "\u2657");
-    this.mapPiecesUnicode.set("bishopblack", "\u265D");
-    this.mapPiecesUnicode.set("knightwhite", "\u2658");
-    this.mapPiecesUnicode.set("knightblack", "\u265E");
-    this.mapPiecesUnicode.set("pawnwhite", "\u2659");
-    this.mapPiecesUnicode.set("pawnblack", "\u265F");
+    this.mapPiecesUnicode.set("kingwhite", "♔");
+    this.mapPiecesUnicode.set("kingblack", "♚");
+    this.mapPiecesUnicode.set("queenwhite", "♕");
+    this.mapPiecesUnicode.set("queenblack", "♛");
+    this.mapPiecesUnicode.set("rookwhite", "♖");
+    this.mapPiecesUnicode.set("rookblack", "♜");
+    this.mapPiecesUnicode.set("bishopwhite", "♗");
+    this.mapPiecesUnicode.set("bishopblack", "♝");
+    this.mapPiecesUnicode.set("knightwhite", "♘");
+    this.mapPiecesUnicode.set("knightblack", "♞");
+    this.mapPiecesUnicode.set("pawnwhite", "♙");
+    this.mapPiecesUnicode.set("pawnblack", "♟");
   }
 
   constructor(color, coordinates, type) {

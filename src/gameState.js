@@ -1,6 +1,7 @@
 export { GameState };
 class GameState {
   constructor() {
+    (this.movementTarget=[]),
     (this.movementRegisterCopy = []),
       (this.movementRegister = []),
       (this.movementWhiteBlack = []),

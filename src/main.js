@@ -26,21 +26,33 @@ import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
 import { isStaleMate } from "./stalematedetection.js";
-import { supaRequest,insertNewGame, SUPABASE_KEY, getGameId,updateGameInSupaBase,getGameData,updateGameAndObjectsInGame } from "./services/http.js";
-export { isMovementValidHandler };
-document.addEventListener("DOMContentLoaded", start);
+import {
+  supaRequest,
+  insertNewGame,
+  SUPABASE_KEY,
+  getGameId,
+  updateGameInSupaBase,
+  getGameData,
+  updateGameAndObjectsInGame,
+} from "./services/http.js";
+export { isMovementValidHandler, start };
 async function start() {
   /*create table and put pieces*/
   //creem el gameState y el movementTarget
-  let gameState = new GameState();
-  let movementTarget = [];
+  console.log(getGameId());
+  if (!getGameId()) {
+    let gameState = new GameState();
+    await createTablePieces(gameState, gameState.movementTarget);
+  } else {
+    await createTableFromData(getGameId());
+  }
 
-  createTablePieces(gameState, movementTarget);
-  await insertNewGame(SUPABASE_KEY,gameState);
   /*game(gameState,movementTarget);*/
 }
-function createTablePieces(gameState, movementTarget) {
+
+async function createTablePieces(gameState, movementTarget) {
   let chessBoard = document.querySelector("#chessboard");
+  chessBoard.innerHTML="";
   /*make a array of constructors*/
   let orderPiecesConstructors = [
     Rook,
@@ -82,7 +94,6 @@ function createTablePieces(gameState, movementTarget) {
         gameState.piecesAlive.push(
           new orderPiecesConstructors[j]("black", column + row)
         );
-        square.classList;
       } else if (i === 1) {
         /*pawn: black*/
         gameState.piecesAlive.push(new Pawn("black", column + row));
@@ -111,7 +122,70 @@ function createTablePieces(gameState, movementTarget) {
   }
 
   gameState.start = true;
+  let response = await insertNewGame(SUPABASE_KEY, gameState);
+  console.log("La resposata" + response);
+  console.log(gameState);
 }
+async function createTableFromData(gameId) {
+  let gameState = new GameState();
+  gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+  console.log(gameState);
+
+  let chessBoard = document.querySelector("#chessboard");
+  chessBoard.innerHTML="";
+  /*make a array of constructors*/
+  let orderPiecesConstructors = [
+    Rook,
+    Knight,
+    Bishop,
+    Queen,
+    King,
+    Bishop,
+    Knight,
+    Rook,
+  ];
+  /*black top white down*/
+  let charCode = "a".charCodeAt(0);
+  for (let i = 0; i < 8; i++) {
+    let row = 8 - i;
+    /*if i%2==0 true (starts with green) else false (starts with white)*/
+    let greenStart = i % 2 === 0;
+    for (let j = 0; j < 8; j++) {
+      /*if greenStart = true -> put white when j%2===0
+        -> false: put greenwhen j%2===0
+        */
+      let color = greenStart
+        ? j % 2 === 0
+          ? "white"
+          : "green"
+        : j % 2 === 0
+        ? "green"
+        : "white";
+      let column = String.fromCharCode(charCode + j);
+      let square = document.createElement("span");
+      square.classList.add(color);
+      square.classList.add("square");
+      square.addEventListener("click", (e) =>
+        captureAction(e, gameState, gameState.movementTarget)
+      );
+      console.log(gameState.piecesAlive);
+      let found = gameState.piecesAlive.find(
+        (piece) => piece.coordinates === column + row
+      );
+      console.log("Found " + found);
+      if (found) {
+        let unicodeValuePiece = found.unicodePiece;
+        square.id = found.type + found.color + "_";
+        square.textContent = unicodeValuePiece;
+      }
+      square.id += column + row;
+      chessBoard.appendChild(square);
+    }
+  }
+
+  gameState.start = true;
+}
+
 /*El joc començarà quan el jugador de les blanques faça un moviment valid, açò comporta
 1) clickar sobre la peça
 2) clickar a altre escac 
@@ -189,8 +263,10 @@ async function captureAction(e, gameState, movementTarget) {
           movePiece(movementTarget, gameState);
           changeTurn(gameState);
 
-          await updateGameInSupaBase(gameState,getGameId());
-          await updateGameAndObjectsInGame(gameState,getGameId());
+          await updateGameInSupaBase(gameState, getGameId());
+          gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+
+          console.log(gameState);
 
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
           if (isCheckMate(gameState)) {
@@ -204,8 +280,8 @@ async function captureAction(e, gameState, movementTarget) {
           }
         } else {
           pastContentArrays(gameState);
-          await updateGameInSupaBase(gameState,getGameId());
-          await updateGameAndObjectsInGame(gameState,getGameId());
+          await updateGameInSupaBase(gameState, getGameId());
+          gameState = await updateGameAndObjectsInGame(gameState, getGameId());
         }
       }
       movementTarget.splice(0, movementTarget.length);
@@ -260,8 +336,11 @@ async function captureAction(e, gameState, movementTarget) {
             playRandomAttackSound();
             killPiece(movementTarget, gameState);
             changeTurn(gameState);
-            await updateGameInSupaBase(gameState,getGameId());
-            await updateGameAndObjectsInGame(gameState,getGameId());
+            await updateGameInSupaBase(gameState, getGameId());
+            gameState = await updateGameAndObjectsInGame(
+              gameState,
+              getGameId()
+            );
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
               gameState.start = false;
@@ -273,8 +352,11 @@ async function captureAction(e, gameState, movementTarget) {
             }
           } else {
             pastContentArrays(gameState);
-            await updateGameInSupaBase(gameState,getGameId());
-            await updateGameAndObjectsInGame(gameState,getGameId());
+            await updateGameInSupaBase(gameState, getGameId());
+            gameState = await updateGameAndObjectsInGame(
+              gameState,
+              getGameId()
+            );
           }
         }
         movementTarget.splice(0, movementTarget.length);

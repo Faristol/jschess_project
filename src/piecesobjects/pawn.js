@@ -60,7 +60,7 @@ class Pawn extends PieceFather {
               return false;
             }
           } else {
-            /*pot merejar sols 1*/
+            /*pot moure sols 1*/
             if (numDifference === 1) {
               return isVerticalAscendent(start, end);
             } else {
