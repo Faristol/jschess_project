@@ -42,18 +42,20 @@ function expirationDate(expires_in) {
   }
   
   async function registerUser(email, password) {
-    const status = { success: false };
+    let info;
+    const status = { success: false,
+    };
     try {
-      signUpSupabase(email, password).then((dataRegister) => {
+       info = signUpSupabase(email, password).then((dataRegister) => {
         console.log(dataRegister);
         status.success = true;
       });
     } catch (err) {
       console.log(err);
       status.success = false;
-      status.errorText = err.error_description;
+    }finally{
+        return {info,status}
     }
-    return status;
   }
   
   function logout() {

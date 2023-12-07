@@ -33,10 +33,10 @@ function registerForm() {
       const password = divLogin.querySelector("#signuppassword").value;
       registerUser(email, password).then((status) => {
         console.log(status)
-        if (status.success) {
+        if (status.status.success) {
           window.location.hash = "#/login";
         } else {
-          divLogin.querySelector("#errors").innerHTML = status.msg;
+          divLogin.querySelector("#errors").innerHTML = status.info;
         }
       });
     });
