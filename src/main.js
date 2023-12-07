@@ -272,11 +272,13 @@ async function captureAction(e, gameState, movementTarget) {
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
           if (isCheckMate(gameState)) {
             gameState.start = false;
+            gameState.checkmate=true;
             game(gameState, movementTarget);
           }
           //sino hi ha jaque mate vegem si el rival esta en stalemate
           if (isStaleMate(gameState)) {
             gameState.start = false;
+            gameState.stalemate = true;
             game(gameState, movementTarget);
           }
         } else {
@@ -349,10 +351,12 @@ async function captureAction(e, gameState, movementTarget) {
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
               gameState.start = false;
+              gameState.checkmate=true;
               game(gameState, movementTarget);
             }
             if (isStaleMate(gameState)) {
               gameState.start = false;
+              gameState.stalemate = true;
               game(gameState, movementTarget);
             }
           } else {

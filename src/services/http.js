@@ -6,7 +6,17 @@ export {
   getGameId,
   updateGameInSupaBase,
   getGameData,
-  updateGameAndObjectsInGame
+  updateGameAndObjectsInGame,
+  urlBase,
+  loginSupabase,
+  signUpSupabase,
+  logoutSupabase,
+  recoverPasswordSupabase,
+  updateData,
+  createData,
+  getData,
+  fileRequest,
+  getFileRequest,
 };
 import { GameState } from "../gameState.js";
 import { Bishop } from "../piecesobjects/bishop.js";
@@ -16,6 +26,7 @@ import { Pawn } from "../piecesobjects/pawn.js";
 import { PieceFather } from "../piecesobjects/piecefather.js";
 import { Queen } from "../piecesobjects/queen.js";
 import { Rook } from "../piecesobjects/rook.js";
+const urlBase = "https://fgjdwpkhvmbjdncfvsbj.supabase.co";
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnamR3cGtodm1iamRuY2Z2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk4NzI4MDgsImV4cCI6MjAxNTQ0ODgwOH0.D096jzje7lSbJs3dc9ZOEA1Zvt4_lqsAHulejU-M3FY";
 const headers = {
@@ -94,10 +105,9 @@ async function getGameData(id) {
     return null;
   }
 }
-async function updateGameAndObjectsInGame(gameState,gameId) {
+async function updateGameAndObjectsInGame(gameState, gameId) {
   const updatedGameData = await getGameData(gameId);
   console.log(updatedGameData);
- 
 
   Object.keys(updatedGameData).forEach((key) => {
     console.log(key);
@@ -109,12 +119,11 @@ async function updateGameAndObjectsInGame(gameState,gameId) {
         "piecesDeadCopy",
       ].includes(key)
     ) {
-      if(key instanceof Array){
+      if (key instanceof Array) {
         gameState[key] = [...updatedGameData[key]];
-      } else{
+      } else {
         gameState[key] = updatedGameData[key];
       }
-      
     } else {
       console.log("entra");
       gameState[key] = updatedGameData[key].map((pieceData) => {
@@ -140,15 +149,110 @@ async function updateGameAndObjectsInGame(gameState,gameId) {
             piece = new Rook();
             break;
         }
-        if(piece instanceof PieceFather){
-          console.log("piecedata"+pieceData);
+        if (piece instanceof PieceFather) {
+          console.log("piecedata" + pieceData);
           Object.assign(piece, pieceData);
-        return piece;
+          return piece;
         }
-        
       });
     }
   });
   console.log(gameState.piecesAlive);
   return gameState;
+}
+async function fileRequest(url, body, token) {
+  const headersFile = {
+    apiKey: SUPABASE_KEY,
+    Authorization: `Bearer ${token}`,
+    "x-upsert": true, // Necessari per a sobreescriure
+  };
+  const response = await fetch(`${urlBase}${url}`, {
+    method: "POST",
+    headers: headersFile,
+    body,
+  });
+  if (response.status >= 200 && response.status <= 300) {
+    if (response.headers.get("content-type")) {
+      const datos = await response.json(); // Retorna un json amb la ruta relativa.
+      datos.urlAvatar = `${urlBase}${url}`; // El que
+      return datos;
+    }
+    return {};
+  }
+
+  return Promise.reject(await response.json());
+}
+
+async function getFileRequest(url, token) {
+  const headersFile = {
+    apiKey: SUPABASE_KEY,
+    Authorization: `Bearer ${token}`,
+  };
+  const response = await fetch(`${url}`, {
+    method: "GET",
+    headers: headersFile,
+  });
+  if (response.status >= 200 && response.status <= 300) {
+    if (response.headers.get("content-type")) {
+      const datos = await response.blob();
+      return datos;
+    }
+    return {};
+  }
+
+  return Promise.reject(await response.json());
+}
+
+async function loginSupabase(email, password) {
+  const url = `${urlBase}/auth/v1/token?grant_type=password`;
+  const data = await supaRequest(url, "post", headers, { email, password });
+  return data;
+}
+
+async function signUpSupabase(email, password) {
+  const url = `${urlBase}/auth/v1/signup`;
+  const data = await supaRequest(url, "post", headers, { email, password });
+  return data;
+}
+
+async function logoutSupabase(token) {
+  const url = `${urlBase}/auth/v1/logout`;
+  const headersAux = { ...headers, Authorization: `Bearer ${token}` };
+  const data = await supaRequest(url, "post", headersAux, {});
+  return data;
+}
+
+async function recoverPasswordSupabase(email) {
+  const url = `${urlBase}/auth/v1/recover`;
+  const headersAux = { ...headers };
+  const data = await supaRequest(url, "post", headersAux, { email });
+  return data;
+}
+async function getData(URI, token) {
+  const url = `${urlBase}/rest/v1/${URI}`;
+  const headersAux = { ...headers, Authorization: `Bearer ${token}` };
+  const data = await supaRequest(url, "get", headersAux);
+  return data;
+}
+
+async function updateData(URI, token, data) {
+  const url = `${urlBase}/rest/v1/${URI}`;
+  const headersAux = {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+    Prefer: "return=representation",
+  };
+  const response = await supaRequest(url, "PATCH", headersAux, data);
+  return response;
+}
+
+async function createData(URI, token, data) {
+  const url = `${urlBase}/rest/v1/${URI}`;
+  const headersAux = {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+    Prefer: "return=representation",
+  };
+  const response = await supaRequest(url, "post", headersAux, data);
+  return response;
 }

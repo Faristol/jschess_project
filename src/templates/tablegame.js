@@ -1,7 +1,7 @@
 
 export function table(){
     let mainWindowRow = document.createElement("div");
-    container.innerHTML = ` <table>
+    mainWindowRow.innerHTML = ` <table>
     <tbody>
         <tr>
             <td class="numletter">8</td>
