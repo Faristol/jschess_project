@@ -169,10 +169,11 @@ async function createTableFromData(gameId) {
         captureAction(e, gameState, gameState.movementTarget)
       );
       console.log(gameState.piecesAlive);
+      console.log(column+row);
       let found = gameState.piecesAlive.find(
         (piece) => piece.coordinates === column + row
       );
-      console.log("Found " + found);
+      console.log( found);
       if (found) {
         let unicodeValuePiece = found.unicodePiece;
         square.id = found.type + found.color + "_";
@@ -263,8 +264,8 @@ async function captureAction(e, gameState, movementTarget) {
           movePiece(movementTarget, gameState);
           changeTurn(gameState);
 
-          await updateGameInSupaBase(gameState, getGameId());
-          gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+          //await updateGameInSupaBase(gameState, getGameId());
+          //gameState = await updateGameAndObjectsInGame(gameState, getGameId());
 
           console.log(gameState);
 
@@ -280,11 +281,15 @@ async function captureAction(e, gameState, movementTarget) {
           }
         } else {
           pastContentArrays(gameState);
-          await updateGameInSupaBase(gameState, getGameId());
-          gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+          //await updateGameInSupaBase(gameState, getGameId());
+          //gameState = await updateGameAndObjectsInGame(gameState, getGameId());
         }
       }
+
       movementTarget.splice(0, movementTarget.length);
+      await updateGameInSupaBase(gameState, getGameId());
+      gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+      console.log(movementTarget);
     } else if (
       element.textContent.length !== 0 &&
       movementTarget.length === 1
@@ -336,11 +341,11 @@ async function captureAction(e, gameState, movementTarget) {
             playRandomAttackSound();
             killPiece(movementTarget, gameState);
             changeTurn(gameState);
-            await updateGameInSupaBase(gameState, getGameId());
-            gameState = await updateGameAndObjectsInGame(
-              gameState,
-              getGameId()
-            );
+            //await updateGameInSupaBase(gameState, getGameId());
+            //gameState = await updateGameAndObjectsInGame(
+             // gameState,
+             // getGameId()
+            //);
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
               gameState.start = false;
@@ -352,14 +357,17 @@ async function captureAction(e, gameState, movementTarget) {
             }
           } else {
             pastContentArrays(gameState);
-            await updateGameInSupaBase(gameState, getGameId());
-            gameState = await updateGameAndObjectsInGame(
-              gameState,
-              getGameId()
-            );
+            //await updateGameInSupaBase(gameState, getGameId());
+            //gameState = await updateGameAndObjectsInGame(
+              //gameState,
+              //getGameId()
+            //);
           }
         }
         movementTarget.splice(0, movementTarget.length);
+        await updateGameInSupaBase(gameState, getGameId());
+        gameState = await updateGameAndObjectsInGame(gameState, getGameId());
+        console.log(movementTarget);
       }
     }
   }
