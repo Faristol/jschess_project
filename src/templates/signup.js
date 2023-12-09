@@ -31,12 +31,13 @@ function registerForm() {
       event.preventDefault();
       const email = divLogin.querySelector("#signupemail").value;
       const password = divLogin.querySelector("#signuppassword").value;
-      registerUser(email, password).then((status) => {
-        console.log(status)
-        if (status.status.success) {
+      divLogin.querySelector("#errors").innerHTML="";
+      registerUser(email, password).then((result) => {
+        console.log(result.err);
+        if (result.status.success) {
           window.location.hash = "#/login";
         } else {
-          divLogin.querySelector("#errors").innerHTML = status.info;
+          divLogin.querySelector("#errors").innerHTML = result.err;
         }
       });
     });

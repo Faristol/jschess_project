@@ -6,16 +6,16 @@ function menu() {
 <div class="collapse navbar-collapse" id="navbarSupportedContent">
   <ul class="navbar-nav mr-auto">
     <li class="nav-item active">
-      <a class="nav-link" href="#">Home</a>
+      <a class="nav-link" href="#/game">Game</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Profile</a>
+      <a class="nav-link" href="#/profile">Profile</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">Your games</a>
+      <a class="nav-link" href="#/yourgames">Your games</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="#">All games</a>
+      <a class="nav-link" href="#/allgames">All games</a>
     </li>
 </div>
 </nav><br><br>`;

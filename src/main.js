@@ -34,6 +34,7 @@ import {
   updateGameInSupaBase,
   getGameData,
   updateGameAndObjectsInGame,
+  updateResultSupaBase, getResult
 } from "./services/http.js";
 export { isMovementValidHandler, start };
 async function start() {
@@ -52,7 +53,7 @@ async function start() {
 
 async function createTablePieces(gameState, movementTarget) {
   let chessBoard = document.querySelector("#chessboard");
-  chessBoard.innerHTML="";
+  chessBoard.innerHTML = "";
   /*make a array of constructors*/
   let orderPiecesConstructors = [
     Rook,
@@ -132,7 +133,7 @@ async function createTableFromData(gameId) {
   console.log(gameState);
 
   let chessBoard = document.querySelector("#chessboard");
-  chessBoard.innerHTML="";
+  chessBoard.innerHTML = "";
   /*make a array of constructors*/
   let orderPiecesConstructors = [
     Rook,
@@ -169,11 +170,11 @@ async function createTableFromData(gameId) {
         captureAction(e, gameState, gameState.movementTarget)
       );
       console.log(gameState.piecesAlive);
-      console.log(column+row);
+      console.log(column + row);
       let found = gameState.piecesAlive.find(
         (piece) => piece.coordinates === column + row
       );
-      console.log( found);
+      console.log(found);
       if (found) {
         let unicodeValuePiece = found.unicodePiece;
         square.id = found.type + found.color + "_";
@@ -272,13 +273,30 @@ async function captureAction(e, gameState, movementTarget) {
           //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate
           if (isCheckMate(gameState)) {
             gameState.start = false;
-            gameState.checkmate=true;
+            gameState.checkmate = true;
+            movementTarget.splice(0, movementTarget.length);
+            await updateGameInSupaBase(gameState, getGameId());
+            gameState = await updateGameAndObjectsInGame(
+              gameState,
+              getGameId()
+            );
+            const winner = gameState.turn === "white" ? "black" : "white";
+            const result = `${gameState.players[winner]} (${winner}) 1 - 0 ${
+              gameState.players[gameState.turn]
+            } (${gameState.turn})`;
+            await updateResultSupaBase(result, getGameId());
             game(gameState, movementTarget);
           }
           //sino hi ha jaque mate vegem si el rival esta en stalemate
           if (isStaleMate(gameState)) {
             gameState.start = false;
             gameState.stalemate = true;
+            movementTarget.splice(0, movementTarget.length);
+            await updateGameInSupaBase(gameState, getGameId());
+            gameState = await updateGameAndObjectsInGame(
+              gameState,
+              getGameId()
+            );
             game(gameState, movementTarget);
           }
         } else {
@@ -345,26 +363,43 @@ async function captureAction(e, gameState, movementTarget) {
             changeTurn(gameState);
             //await updateGameInSupaBase(gameState, getGameId());
             //gameState = await updateGameAndObjectsInGame(
-             // gameState,
-             // getGameId()
+            // gameState,
+            // getGameId()
             //);
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
               gameState.start = false;
-              gameState.checkmate=true;
+              gameState.checkmate = true;
+              movementTarget.splice(0, movementTarget.length);
+              await updateGameInSupaBase(gameState, getGameId());
+              gameState = await updateGameAndObjectsInGame(
+                gameState,
+                getGameId()
+              );
+              const winner = gameState.turn === "white" ? "black" : "white";
+              const result = `${gameState.players[winner]} (${winner}) 1 - 0 ${
+                gameState.players[gameState.turn]
+              } (${gameState.turn})`;
+              await updateResultSupaBase(result, getGameId());
               game(gameState, movementTarget);
             }
             if (isStaleMate(gameState)) {
               gameState.start = false;
               gameState.stalemate = true;
+              movementTarget.splice(0, movementTarget.length);
+              await updateGameInSupaBase(gameState, getGameId());
+              gameState = await updateGameAndObjectsInGame(
+                gameState,
+                getGameId()
+              );
               game(gameState, movementTarget);
             }
           } else {
             pastContentArrays(gameState);
             //await updateGameInSupaBase(gameState, getGameId());
             //gameState = await updateGameAndObjectsInGame(
-              //gameState,
-              //getGameId()
+            //gameState,
+            //getGameId()
             //);
           }
         }
@@ -376,12 +411,13 @@ async function captureAction(e, gameState, movementTarget) {
     }
   }
 }
-function game(gameState, movementTarget) {
-  /*enableDisableMovementPlayerColor((gameState.turn==='white'?'white':'black'),(gameState.turn==='white'?'black':'white'));*/
-  /*si arriba ací el joc encara esta en start, però falta 1 moviment x a fer la copia*/
+async function game(gameState, movementTarget) {
   console.log(gameState.start);
   if (!gameState.start) {
     console.log("Joc Acabat");
+    let result = await getResult(getGameId());
+    console.log("Resultat "+result)
+
   }
 }
 function gameEnd() {}

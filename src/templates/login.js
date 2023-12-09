@@ -24,6 +24,7 @@ function loginForm() {
     <button type="submit" id="loginbutton" class="btn btn-primary">Submit</button>
     <a href="#/signup">Sign up</a>
     <div id="errors"></div>
+    <div id='info'></div>
     </form>`;
   
     divLogin.querySelector('#loginbutton').addEventListener('click', async (event) => {
@@ -42,7 +43,8 @@ function loginForm() {
       event.preventDefault();
       const email = divLogin.querySelector('#loginemail').value;
       forgotPassword(email);
-      event.target.parentElement.append('You have an Email');
+      divLogin.querySelector('#info').innerHTML="You have an Email";
+      //event.target.parentElement.append('You have an Email');
     });
   
     return divLogin;

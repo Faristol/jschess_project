@@ -17,6 +17,8 @@ export {
   getData,
   fileRequest,
   getFileRequest,
+  updateResultSupaBase,
+  getResult
 };
 import { GameState } from "../gameState.js";
 import { Bishop } from "../piecesobjects/bishop.js";
@@ -30,7 +32,7 @@ const urlBase = "https://fgjdwpkhvmbjdncfvsbj.supabase.co";
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnamR3cGtodm1iamRuY2Z2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk4NzI4MDgsImV4cCI6MjAxNTQ0ODgwOH0.D096jzje7lSbJs3dc9ZOEA1Zvt4_lqsAHulejU-M3FY";
 const headers = {
-  apiKey: SUPABASE_KEY,
+  apikey: SUPABASE_KEY,
   "Content-Type": "application/json",
 };
 
@@ -84,13 +86,25 @@ async function updateGameInSupaBase(data, id) {
 
   return response;
 }
+async function updateResultSupaBase(data, id) {
+  const url = `https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game?id=eq.${id}&select=result`;
+  const headersAux = {
+    ...headers,
+    Authorization: `Bearer ${SUPABASE_KEY}`,
+    Prefer: "return=minimal",
+  };
+  const result = { result: data };
+  const response = await supaRequest(url, "PATCH", headersAux, result);
+
+  return response;
+}
 async function getGameData(id) {
   try {
     const response = await fetch(
       `https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game?id=eq.${id}&select=game`,
       {
         headers: {
-          apiKey: SUPABASE_KEY,
+          apikey: SUPABASE_KEY,
           Authorization: `Bearer ${SUPABASE_KEY}`,
         },
       }
@@ -101,6 +115,27 @@ async function getGameData(id) {
     }
     const data = await response.json();
     return data[0].game;
+  } catch (error) {
+    return null;
+  }
+}
+async function getResult(id) {
+  try {
+    const response = await fetch(
+      `https://fgjdwpkhvmbjdncfvsbj.supabase.co/rest/v1/game?id=eq.${id}&select=result`,
+      {
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${SUPABASE_KEY}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data[0].result;
   } catch (error) {
     return null;
   }

@@ -43,18 +43,21 @@ function expirationDate(expires_in) {
   
   async function registerUser(email, password) {
     let info;
-    const status = { success: false,
-    };
+    let err = "";
+    const status = { success: false };
+  
     try {
-       info = signUpSupabase(email, password).then((dataRegister) => {
-        console.log(dataRegister);
-        status.success = true;
-      });
-    } catch (err) {
-      console.log(err);
+     
+      info = await signUpSupabase(email, password);
+      console.log(info);
+      status.success = true;
+    } catch (error) {
+      console.log(error);
+      err = error.msg || "Error desconocido";
       status.success = false;
-    }finally{
-        return {info,status}
+    } finally {
+
+      return { err, status };
     }
   }
   
@@ -88,6 +91,7 @@ function expirationDate(expires_in) {
   
   async function getProfile() {
     const access_token = localStorage.getItem('access_token');
+    console.log(access_token);
     const uid = localStorage.getItem('uid');
     const responseGet = await getData(`profiles?id=eq.${uid}&select=*`, access_token);
     console.log(responseGet);
