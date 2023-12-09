@@ -38,10 +38,11 @@ async function route(route){
           main.innerHTML = '';
           main.append(profileForm());
           break;
-        case "#/result":
+        case '#/result':
           main.innerHTML = "";
           nav.innerHTML = "";
           main.append(result());
+          break;
         default:
           window.location.hash = '#/login';
       }

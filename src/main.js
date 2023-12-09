@@ -36,6 +36,7 @@ import {
   updateGameAndObjectsInGame,
   updateResultSupaBase, getResult
 } from "./services/http.js";
+import { route } from "./router.js";
 export { isMovementValidHandler, start };
 async function start() {
   /*create table and put pieces*/
@@ -422,7 +423,7 @@ async function game(gameState, movementTarget) {
    //borrem el gameId posem rel resultat, i redirigim al template result, 
    //on es mostrara el resultat i hi hauran dos botons Logout -> que borrara tot el localStorage i redirigirà a login 
    //i Play que iniciarà altra partida
-   window.location.hash='#/result';
+   route('#/result');
 
   }
 }
