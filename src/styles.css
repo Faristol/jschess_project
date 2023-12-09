@@ -48,6 +48,12 @@ body{
   align-items: center;
   height: 50vh;
 }
+.content{
+    margin:auto;
+    margin-top: 10vh;
+    width: fit-content;
+    height: fit-content;
+}
 
 
 

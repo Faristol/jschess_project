@@ -1,7 +1,8 @@
 export { result };
 function result() {
   let resultSpan = document.createElement("span");
-  resultSpan.innerHTML = `<div class="card bg-info border border-primary rounded form-centrat">
+  resultSpan.classList.add('form-centrat','content')
+  resultSpan.innerHTML = `<div class="card bg-info border border-primary rounded form-centrat content">
   <div class="card-header">
     Resultat
   </div>

@@ -21,7 +21,7 @@ function registerForm() {
       <input type="checkbox" class="form-check-input" id="remember">
       <label class="form-check-label" for="remember">Remember</label>
     </div>
-    <button type="submit" id="signupbtn" class="btn btn-primary">Submit</button>
+    <button type="submit" id="signupbtn" class="btn btn-primary">Submit</button><br><a href="#/login">Login</a>
     <div id="errors"></div>
     </form>`;
 
