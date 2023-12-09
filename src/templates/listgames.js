@@ -1,5 +1,5 @@
-export { menu };
-function menu() {
+export { listgames };
+function listgames() {
   let navBar = document.createElement("span");
   navBar.innerHTML = `<nav class="navbar navbar-expand-lg navbar-light bg-info border border-primary rounded">
 <a class="navbar-brand">Churumdrez</a>

@@ -8,16 +8,19 @@ function profileForm() {
   // let dataProfile = JSON.parse(localStorage.getItem('dataProfile'));
   const divLogin = document.createElement('div');
   divLogin.classList.add('form-centrat');
+  
+
 
   getProfile().then((dataProfile) => {
     dataProfile = dataProfile[0];
     console.log(dataProfile);
 
-    divLogin.innerHTML = `<form action="action_page.php" id="formProfile" style="border: 1px solid #ccc">
+    divLogin.innerHTML = `<form action="action_page.php" id="formProfile" class="bg-info border border-primary rounded pad" style="border: 1px solid #ccc">
     <div class="container">
       <h1>Profile</h1>
       
       <hr />
+      <p>
 
       <label for="email"><b>Email</b></label>
       <input
@@ -29,6 +32,8 @@ function profileForm() {
         readonly
         value="${localStorage.getItem('email')}"
       />
+      </p>
+      <p>
 
       <label for="psw"><b>Password</b></label>
       <input
@@ -47,7 +52,7 @@ function profileForm() {
         required
       />
       <button type="button" class="signupbtn login" id="chgpass">Change Password</button>
-
+</p>
       <label for="username"><b>Username</b></label>
       <input
         type="text"
@@ -88,7 +93,7 @@ function profileForm() {
 
 
       <div class="clearfix">
-
+<br>
         <button type="button" class="signupbtn login" id="update">Update Profile</button>
       </div>
     </div>

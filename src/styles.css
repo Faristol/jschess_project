@@ -54,6 +54,9 @@ body{
     width: fit-content;
     height: fit-content;
 }
+.pad{
+    padding: 10px;
+}
 
 
 
