@@ -417,6 +417,12 @@ async function game(gameState, movementTarget) {
     console.log("Joc Acabat");
     let result = await getResult(getGameId());
     console.log("Resultat "+result)
+   localStorage.removeItem("gameId");
+   localStorage.setItem("resultat",result);
+   //borrem el gameId posem rel resultat, i redirigim al template result, 
+   //on es mostrara el resultat i hi hauran dos botons Logout -> que borrara tot el localStorage i redirigirà a login 
+   //i Play que iniciarà altra partida
+   window.location.hash='#/result';
 
   }
 }

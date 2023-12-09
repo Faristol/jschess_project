@@ -6,6 +6,7 @@ import { menu } from "./templates/menu.js";
 import { loginForm } from "./templates/login.js";
 import {registerForm} from "./templates/signup.js";
 import { profileForm } from './templates/profile.js';
+import { result } from "./templates/result.js";
 async function route(route){
     const main = document.querySelector('#container');
     const nav = document.querySelector('#menu');
@@ -23,6 +24,7 @@ async function route(route){
           await start();
         break;
         case '#/login':
+          localStorage.clear();
           main.innerHTML = "";
           nav.innerHTML = "";
           main.append(loginForm());
@@ -36,6 +38,10 @@ async function route(route){
           main.innerHTML = '';
           main.append(profileForm());
           break;
+        case "#/result":
+          main.innerHTML = "";
+          nav.innerHTML = "";
+          main.append(result());
         default:
           window.location.hash = '#/login';
       }
