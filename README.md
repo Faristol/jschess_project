@@ -11,4 +11,3 @@ Reglas Pendientes
 -----------------------------------------------------------------------------------------------------------------------------------------
 Aunque la diversión está garantizada, debo confesar que algunas reglas clásicas del ajedrez aún no han sido implementadas.
 ¡Pero no te preocupes! En el futuro, planeo añadir funciones como el enroque, la promoción, el "stalemate" y más.
-Mantente atento a las actualizaciones y sé testigo de la evolución de este emocionante proyecto.
