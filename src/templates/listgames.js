@@ -1,21 +1,22 @@
 export { listgames };
-function listgames() {
-  let navBar = document.createElement("span");
-  navBar.innerHTML = `<nav class="navbar navbar-expand-lg navbar-light bg-info border border-primary rounded">
-<a class="navbar-brand">Churumdrez</a>
-<div class="collapse navbar-collapse" id="navbarSupportedContent">
-  <ul class="navbar-nav mr-auto">
-    <li class="nav-item active">
-      <a class="nav-link" href="#/game">Game</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#/profile">Profile</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#/listgames">List games</a>
-    </li>
-</div>
-</nav><br><br>`;
-
-  return navBar;
+import { getList } from "../services/http.js";
+async function listgames(params) {
+    let listGames =  await getList(params);
+  let list = document.createElement("span");
+  list.innerHTML = `<table class="table table-hover table-primary">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Result</th>
+      <th scope="col">Movements</th>
+    </tr>
+  </thead>
+  <tbody>
+    ${listGames}
+  </tbody>
+</table>
+<a href="#/listgames?previous" class="btn btn-primary">Previous</a>
+<a href="#/listgames?next" class="btn btn-primary">Next</a>
+`;
+  return list;
 }

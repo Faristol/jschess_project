@@ -18,7 +18,8 @@ export {
   fileRequest,
   getFileRequest,
   updateResultSupaBase,
-  getResult
+  getResult,
+  getList,
 };
 import { GameState } from "../gameState.js";
 import { Bishop } from "../piecesobjects/bishop.js";
@@ -263,11 +264,78 @@ async function recoverPasswordSupabase(email) {
   const data = await supaRequest(url, "post", headersAux, { email });
   return data;
 }
-async function getData(URI, token) {
+async function getData(URI, token, init, fi) {
+  const url = `${urlBase}/rest/v1/${URI}`;
+  const headersAux = {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+    Range: `${init}-${fi}`,
+  };
+  const data = await supaRequest(url, "get", headersAux);
+  return data;
+}
+async function getAllData(URI, token) {
   const url = `${urlBase}/rest/v1/${URI}`;
   const headersAux = { ...headers, Authorization: `Bearer ${token}` };
   const data = await supaRequest(url, "get", headersAux);
   return data;
+}
+async function getList(params){
+  let delta = 5;
+  console.log(localStorage.getItem('init'))
+  console.log(localStorage.getItem('fi'));
+  let data;
+  let allData = await getAllData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY);
+  console.log(allData);
+  let allDataLength = allData.length;
+  if(params===undefined){
+    localStorage.setItem('init',0);
+    localStorage.setItem('fi',4)
+     data= await getData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY,localStorage.getItem('init'),localStorage.getItem('fi'));
+  }else{
+    if(params==='previous'){
+      let initAux = parseInt(localStorage.getItem('init')) - delta;
+      let fiAux = parseInt(localStorage.getItem('fi')) - delta;
+      if(initAux < 0){
+        //si es negatiu no actualizem els items
+        data = await getData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY,localStorage.getItem('init'),localStorage.getItem('fi'));
+      }else{
+        //sino ho és els actualitzem i fem la consulta
+        localStorage.setItem('init',initAux);
+        localStorage.setItem('fi',fiAux)
+        data = await getData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY,localStorage.getItem('init'),localStorage.getItem('fi'));
+      }
+    }else{
+      //si es next
+      let initAux = parseInt(localStorage.getItem('init')) + delta;
+      let fiAux = parseInt(localStorage.getItem('fi')) + delta;
+      if(fiAux>=allDataLength){
+        //si es menor actualitzem
+        //localStorage.setItem('init',initAux);
+       // localStorage.setItem('fi',fiAux)
+        data = await getData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY,localStorage.getItem('fi'),allDataLength);
+      }else{
+        localStorage.setItem('init',initAux);
+       localStorage.setItem('fi',fiAux)
+       data = await getData('game?select=id,game,result&result=not.is.null', SUPABASE_KEY,localStorage.getItem('init'),localStorage.getItem('fi'));
+        
+      }
+    }
+  }
+  let dataTemplate = '';
+  data.forEach((row,index)=>{
+    dataTemplate+=`<tr>
+    <th scope='row'>${index+parseInt(localStorage.getItem('init'))+1}</th>
+    <td>${row.result}</td>
+    <td>${row.game.movementRegister}</td>
+    </tr>
+    `
+  })
+  console.log(dataTemplate);
+  
+
+  return dataTemplate;
+
 }
 
 async function updateData(URI, token, data) {

@@ -11,6 +11,14 @@ import {listgames} from "./templates/listgames.js";
 async function route(route){
     const main = document.querySelector('#container');
     const nav = document.querySelector('#menu');
+    const params = route.split('?');
+    console.log(route);
+    console.log(params);
+    if(params[1]!==undefined){
+      route = params[0];
+      console.log(route);
+    }
+    
     switch (route) {
         case '#/':
           main.innerHTML = "";
@@ -22,6 +30,8 @@ async function route(route){
           nav.innerHTML = "";
           nav.append(menu());
           main.append(table());
+          localStorage.removeItem('init');
+          localStorage.removeItem('fi');
           await start();
         break;
         case '#/login':
@@ -49,7 +59,8 @@ async function route(route){
         case '#/listgames':
           main.innerHTML = "";
           nav.innerHTML = "";
-          route('#/login');
+          nav.append(menu());
+          main.append(await listgames(params[1]));
           break;
         default:
           window.location.hash = '#/login';
