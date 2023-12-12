@@ -3,11 +3,9 @@ import { PieceFather } from "./piecefather.js";
 import {
   isVerticalDescendent,
   isVerticalAscendent,
-  isHorizontalLeftToRight,
-  isHorizontalRightToLeft,
   isDiagonalDescendent,
   isDiagonalAscendent,
-} from "../validation.js";
+} from "../Controller/validation.js";
 class Pawn extends PieceFather {
   constructor(color, coordinates) {
     super(color, coordinates, "pawn");

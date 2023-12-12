@@ -7,7 +7,7 @@ import {
   isHorizontalRightToLeft,
   isDiagonalDescendent,
   isDiagonalAscendent,
-} from "../validation.js";
+} from "../Controller/validation.js";
 class Queen extends PieceFather {
   constructor(color, coordinates) {
     super(color, coordinates, "queen");

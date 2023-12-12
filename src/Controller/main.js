@@ -1,10 +1,10 @@
-import { Bishop } from "./piecesobjects/bishop.js";
-import { King } from "./piecesobjects/king.js";
-import { Knight } from "./piecesobjects/knight.js";
-import { Pawn } from "./piecesobjects/pawn.js";
-import { Queen } from "./piecesobjects/queen.js";
-import { Rook } from "./piecesobjects/rook.js";
-import { PieceFather } from "./piecesobjects/piecefather.js";
+import { Bishop } from "../Model/bishop.js";
+import { King } from "../Model/king.js";
+import { Knight } from "../Model/knight.js";
+import { Pawn } from "../Model/pawn.js";
+import { Queen } from "../Model/queen.js";
+import { Rook } from "../Model/rook.js";
+import { PieceFather } from "../Model/piecefather.js";
 import {
   refreshMovementWhiteBlackOnlyMove,
   refreshMovementWhiteBlackKill,
@@ -21,7 +21,7 @@ import {
   rangeDiagonalLetter,
   hasPieces,
 } from "./piecesbetween.js";
-import { GameState } from "./gameState.js";
+import { GameState } from "../Model/gameState.js";
 import { isKingCheck } from "./checkdetection.js";
 import { isCheckMate } from "./checkmatedetection.js";
 import { playRandomAttackSound } from "./memessounds.js";
@@ -35,7 +35,7 @@ import {
   getGameData,
   updateGameAndObjectsInGame,
   updateResultSupaBase, getResult
-} from "./services/http.js";
+} from "../services/http.js";
 import { route } from "./router.js";
 export { isMovementValidHandler, start };
 async function start() {
@@ -258,6 +258,7 @@ async function captureAction(e, gameState, movementTarget) {
         //-> retornem els arrays als valors inicials i efectuem el moviment i canviem el torn
         //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
         movePieceWithoutRefreshHtml(movementTarget, gameState);
+     
 
         if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
           //si el rei no esta en jaque
@@ -357,9 +358,10 @@ async function captureAction(e, gameState, movementTarget) {
         ) {
           copyArrays(gameState);
           killPieceWithoutRefreshHtml(movementTarget, gameState);
+       
           if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
             pastContentArrays(gameState);
-            playRandomAttackSound();
+            await playRandomAttackSound();
             killPiece(movementTarget, gameState);
             changeTurn(gameState);
             //await updateGameInSupaBase(gameState, getGameId());
@@ -367,8 +369,10 @@ async function captureAction(e, gameState, movementTarget) {
             // gameState,
             // getGameId()
             //);
+            console.log("entra al jaque");
             //si el moviment es valid i ademes el seu rey no esta en jaque ja vegem si el jugador opost esta en jaquemate, o s'ha arribat a un stalemate etc etc
             if (isCheckMate(gameState)) {
+              console.log("es jaque mate");
               gameState.start = false;
               gameState.checkmate = true;
               movementTarget.splice(0, movementTarget.length);

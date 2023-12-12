@@ -1,4 +1,4 @@
-import { route } from '../router.js';
+import { route } from '../Controller/router.js';
 import { getFileRequest } from '../services/http.js';
 import { getProfile, updateProfile } from '../services/users.js';
 

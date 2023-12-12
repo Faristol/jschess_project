@@ -25,13 +25,13 @@ Explicació a grans trets de l'algoritme:
     -> si no es pot atacar a la peça provarem a bloquejar els valors, si un d'ells es bloqueja i el jaquemate continua, passem a altra peça
 .... i així fins que trobem un moviment vàlid que evite el jaquemate o fins que es proven totes les combinacions i no s'haja trobat res.
 */
-import { Bishop } from "./piecesobjects/bishop.js";
-import { King } from "./piecesobjects/king.js";
-import { Knight } from "./piecesobjects/knight.js";
-import { Pawn } from "./piecesobjects/pawn.js";
-import { Queen } from "./piecesobjects/queen.js";
-import { Rook } from "./piecesobjects/rook.js";
-import { PieceFather } from "./piecesobjects/piecefather.js";
+import { Bishop } from "../Model/bishop.js";
+import { King } from "../Model/king.js";
+import { Knight } from "../Model/knight.js";
+import { Pawn } from "../Model/pawn.js";
+import { Queen } from "../Model/queen.js";
+import { Rook } from "../Model/rook.js";
+import { PieceFather } from "../Model/piecefather.js";
 import {
   getPieceObject,
   isPathBlocked,

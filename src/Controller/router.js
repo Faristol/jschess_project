@@ -1,13 +1,13 @@
 export{route};
-import { home } from "./templates/home.js";
-import { table } from "./templates/tablegame.js";
-import { start } from "./main.js";
-import { menu } from "./templates/menu.js";
-import { loginForm } from "./templates/login.js";
-import {registerForm} from "./templates/signup.js";
-import { profileForm } from './templates/profile.js';
-import { result } from "./templates/result.js";
-import {listgames} from "./templates/listgames.js";
+import { home } from "../Views/home.js";
+import { table } from "../Views/tablegame.js";
+import { start } from "../Controller/main.js";
+import { menu } from "../Views/menu.js";
+import { loginForm } from "../Views/login.js";
+import {registerForm} from "../Views/signup.js";
+import { profileForm } from '../Views/profile.js';
+import { result } from "../Views/result.js";
+import {listgames} from "../Views/listgames.js";
 async function route(route){
     const main = document.querySelector('#container');
     const nav = document.querySelector('#menu');

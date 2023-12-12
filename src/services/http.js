@@ -21,14 +21,14 @@ export {
   getResult,
   getList,
 };
-import { GameState } from "../gameState.js";
-import { Bishop } from "../piecesobjects/bishop.js";
-import { King } from "../piecesobjects/king.js";
-import { Knight } from "../piecesobjects/knight.js";
-import { Pawn } from "../piecesobjects/pawn.js";
-import { PieceFather } from "../piecesobjects/piecefather.js";
-import { Queen } from "../piecesobjects/queen.js";
-import { Rook } from "../piecesobjects/rook.js";
+import { GameState } from "../Model/gameState.js";
+import { Bishop } from "../Model/bishop.js";
+import { King } from "../Model/king.js";
+import { Knight } from "../Model/knight.js";
+import { Pawn } from "../Model/pawn.js";
+import { PieceFather } from "../Model/piecefather.js";
+import { Queen } from "../Model/queen.js";
+import { Rook } from "../Model/rook.js";
 const urlBase = "https://fgjdwpkhvmbjdncfvsbj.supabase.co";
 const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZnamR3cGtodm1iamRuY2Z2c2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTk4NzI4MDgsImV4cCI6MjAxNTQ0ODgwOH0.D096jzje7lSbJs3dc9ZOEA1Zvt4_lqsAHulejU-M3FY";

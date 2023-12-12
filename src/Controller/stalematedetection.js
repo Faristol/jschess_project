@@ -1,3 +1,5 @@
+//NO IMPLEMENTAT
+
 export { isStaleMate };
 import {
   calculateNearPositions,
