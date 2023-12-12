@@ -48,12 +48,16 @@ async function route(route){
         case '#/profile':
           main.innerHTML = '';
           nav.innerHTML = "";
+          localStorage.removeItem('init');
+          localStorage.removeItem('fi');
           nav.append(menu());
           main.append(profileForm());
           break;
         case '#/result':
           main.innerHTML = "";
           nav.innerHTML = "";
+          localStorage.removeItem('init');
+          localStorage.removeItem('fi');
           main.append(result());
           break;
         case '#/listgames':

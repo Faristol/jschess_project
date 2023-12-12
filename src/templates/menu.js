@@ -14,6 +14,9 @@ function menu() {
     <li class="nav-item">
       <a class="nav-link" href="#/listgames">List games</a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#/login">Logout</a>
+    </li>
 </div>
 </nav><br><br>`;
 
