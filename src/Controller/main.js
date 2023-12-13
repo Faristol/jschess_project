@@ -258,9 +258,13 @@ async function captureAction(e, gameState, movementTarget) {
         //-> retornem els arrays als valors inicials i efectuem el moviment i canviem el torn
         //-> si està en jaque retornem als valors inicials, pero no efectuem el moviment ni canviem el torn
         movePieceWithoutRefreshHtml(movementTarget, gameState);
-     
-
-        if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
+        let isChecked = isKingCheck(gameState.turn, gameState.piecesAlive);
+        if (isChecked) {
+          const audio = new Audio("../src/audio/cuidao.mp3");
+          //audio.setAttribute("allow", "autoplay");
+           audio.play();
+        }
+        if (!isChecked) {
           //si el rei no esta en jaque
           //carreguem els arrays originals sense modificar i efectuem el moviment
           pastContentArrays(gameState);
@@ -358,8 +362,14 @@ async function captureAction(e, gameState, movementTarget) {
         ) {
           copyArrays(gameState);
           killPieceWithoutRefreshHtml(movementTarget, gameState);
+          let isChecked = isKingCheck(gameState.turn, gameState.piecesAlive);
+        if (isChecked) {
+          const audio = new Audio("../src/audio/cuidao.mp3");
+          //audio.setAttribute("allow", "autoplay");
+           audio.play();
+        }
        
-          if (!isKingCheck(gameState.turn, gameState.piecesAlive)) {
+          if (!isChecked) {
             pastContentArrays(gameState);
             await playRandomAttackSound();
             killPiece(movementTarget, gameState);

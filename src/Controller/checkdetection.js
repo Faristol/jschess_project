@@ -2,7 +2,7 @@
 export {
   limits
 };
-export { isKingCheck };
+export { isKingCheck,piecesMovementHandler,filterOrderAndGetFirstElement };
 
 const limits = [
   "`9",
@@ -58,10 +58,6 @@ function isKingCheck(turn,piecesAlive) {
   });
   let isChecked = false;
   isChecked = piecesMovementHandler(piecesOpponent, king, isChecked,piecesAlive,turn);
-  if (isChecked) {
-    const audio = new Audio("../src/audio/cuidao.mp3");
-    audio.play();
-  }
   return isChecked;
 }
 
