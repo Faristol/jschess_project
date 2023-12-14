@@ -37,7 +37,7 @@ import {
   updateResultSupaBase, getResult
 } from "../services/http.js";
 import { route } from "./router.js";
-export { isMovementValidHandler, start };
+export { isMovementValidHandler, start,createTablePieces,movePieceWithoutRefreshHtml };
 async function start() {
   /*create table and put pieces*/
   //creem el gameState y el movementTarget
@@ -203,6 +203,8 @@ no siga la mateixa posicio a l'actual
 i que no hi haja cap peça seua en la casella destí*/
 async function captureAction(e, gameState, movementTarget) {
   console.log(movementTarget.length);
+  console.log("movementtttttttttttttttttt target--------------------->")
+  console.log(movementTarget);
   console.log(gameState);
   e.stopPropagation();
   let element = e.target;
@@ -371,7 +373,7 @@ async function captureAction(e, gameState, movementTarget) {
        
           if (!isChecked) {
             pastContentArrays(gameState);
-            await playRandomAttackSound();
+            playRandomAttackSound();
             killPiece(movementTarget, gameState);
             changeTurn(gameState);
             //await updateGameInSupaBase(gameState, getGameId());

@@ -10,7 +10,15 @@ import { Knight } from "../src/Model/knight.js";
 import { Pawn } from "../src/Model/pawn.js";
 import { Queen } from "../src/Model/queen.js";
 import { Rook } from "../src/Model/rook.js";
-
+import { createTablePieces } from "../src/Controller/main.js";
+import { GameState } from "../src/Model/gameState.js";
+import { movePieceWithoutRefreshHtml } from "../src/Controller/main.js";
+import {isVerticalDescendent,
+  isVerticalAscendent,
+  isHorizontalLeftToRight,
+  isHorizontalRightToLeft,
+  isDiagonalDescendent,
+  isDiagonalAscendent} from "../src/Controller/validation.js";
 describe("Check", function () {
   describe("Check detection main function", function () {
     it("Deu resultar true", function () {
@@ -346,3 +354,176 @@ describe("Checkmate", function () {
   });
  
 });
+describe("Creació tauler",function(){
+  it('deu crear un tauler amb 64 escacs', async function () {
+
+    let gameState = new GameState();
+    let movementTarget = [];
+    let div = document.createElement("div");
+    div.id = "chessboard";
+    div.style.display='none';
+    
+
+    document.body.appendChild(div);
+
+
+    await createTablePieces(gameState, movementTarget);
+
+ 
+    expect(document.querySelectorAll('.square').length).toBe(64);
+  });
+  it('deu assignar colors als escacs amb el patró del tauler d`escacs', async function() {
+
+    let gameState = new GameState();
+    let movementTarget = [];
+    let div = document.createElement("div");
+    div.id = "chessboard";
+    div.style.display = 'none';
+  
+    
+    document.body.appendChild(div);
+  
+
+    await createTablePieces(gameState, movementTarget);
+  
+
+    
+    let squares = document.querySelectorAll('.square');
+          for (let i = 0; i < squares.length; i++) {
+            let expectedColor = (i % 8 + Math.floor(i / 8)) % 2 === 0 ? 'white' : 'green';
+            expect(squares[i].classList.contains(expectedColor)).toBe(true);
+          }
+  });
+  it('Deu assignar click listeners als escacs', async function() {
+    
+    let gameState = new GameState();
+    let movementTarget = [];
+
+    
+    let div = document.createElement("div");
+    div.id = "chessboard";
+    div.style.display = 'none';
+  
+
+    document.body.appendChild(div);
+  
+  
+    await createTablePieces(gameState, movementTarget);
+
+    
+    let squares = document.querySelectorAll('.square');
+    for (let i = 0; i < squares.length; i++) {
+      expect(squares[i].onclick).toBeDefined();
+    }
+  });
+
+});
+describe('funcions varies',function (){
+  describe('isVerticalDescendent tests',function(){
+    it('Deu retornar true quan estan en la mateixa columna i el moviment es descendent', function() {
+      expect(isVerticalDescendent('a3', 'a1')).toBe(true);
+    });
+    it('Deu retornar false quan estan en la mateixa columna pero el moviment es ascendent', function() {
+      expect(isVerticalDescendent('a1', 'a3')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment no és en la = columna', function() {
+      expect(isVerticalDescendent('a1', 'c3')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment  és diagonal', function() {
+      expect(isVerticalDescendent('h1', 'g2')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment  és horitzontal', function() {
+      expect(isVerticalDescendent('h1', 'a1')).toBe(false);
+    });
+  })
+  describe('isVerticalAscendent tests',function(){
+    it('Deu retornar true quan estan en la mateixa columna i el moviment es ascendent', function() {
+      expect(isVerticalAscendent('a1', 'a3')).toBe(true);
+    });
+    it('Deu retornar false quan estan en la mateixa columna pero el moviment es descendent', function() {
+      expect(isVerticalAscendent('a3', 'a1')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment no és en la = columna', function() {
+      expect(isVerticalAscendent('a1', 'c3')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment  és diagonal', function() {
+      expect(isVerticalAscendent('h1', 'g2')).toBe(false);
+    });
+    it('Deu retornar false quan el moviment  és horitzontal', function() {
+      expect(isVerticalAscendent('h1', 'a1')).toBe(false);
+    });
+  })
+  describe('isHoritzontalLeftToRight tests',function(){
+    it('Deu retornar true quan es un moviement en la mateixa fila desquerra a dreta', function() {
+      expect(isHorizontalLeftToRight('a1', 'h1')).toBe(true);
+    });
+    it('Deu retornar false quan es un moviement en la mateixa fila de dreta a esquerra', function() {
+      expect(isHorizontalLeftToRight('h1', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments verticals', function() {
+      expect(isHorizontalLeftToRight('a1', 'a3')).toBe(false);
+      expect(isHorizontalLeftToRight('a3', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments diagonals', function() {
+      expect(isHorizontalLeftToRight('a1', 'b2')).toBe(false);
+      expect(isHorizontalLeftToRight('b2', 'a1')).toBe(false);
+    });
+    
+    
+  })
+  describe('isHoritzontalRightToLeft tests',function(){
+    it('Deu retornar true quan es un moviement en la mateixa fila de dreta a esquerra', function() {
+      expect(isHorizontalRightToLeft('h1', 'a1')).toBe(true);
+    });
+    it('Deu retornar false quan es un moviement en la mateixa fila de desquerra a dreta', function() {
+      expect(isHorizontalRightToLeft('a1', 'h1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments verticals', function() {
+      expect(isHorizontalRightToLeft('a1', 'a3')).toBe(false);
+      expect(isHorizontalRightToLeft('a3', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments diagonals', function() {
+      expect(isHorizontalRightToLeft('a1', 'b2')).toBe(false);
+      expect(isHorizontalRightToLeft('b2', 'a1')).toBe(false);
+    });
+    
+    
+  })
+  describe('isDiagonalAscendent tests',function(){
+    if('Deu retornar true quan es un moviment diagonal ascendent', function() {
+      expect(isDiagonalAscendent('a1', 'b2')).toBe(true);
+    });
+    it('Deu retornar false quan es un moviment diagonal descendent', function() {
+      expect(isDiagonalAscendent('b2', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments horitzontals', function() {
+      expect(isDiagonalAscendent('a1', 'h1')).toBe(false);
+      expect(isDiagonalAscendent('h1', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments verticals', function() {
+      expect(isDiagonalAscendent('a1', 'a3')).toBe(false);
+      expect(isDiagonalAscendent('a3', 'a1')).toBe(false);
+    });
+    
+    
+  })
+  describe('isDiagonalDescendent tests',function(){
+    it('Deu retornar true quan es un moviment diagonal descendent', function() {
+      expect(isDiagonalDescendent('b2', 'a1')).toBe(true);
+    });
+    it('Deu retornar false quan es un moviment diagonal ascendent', function() {
+      expect(isDiagonalDescendent('a1', 'b2')).toBe(false);
+    });
+    it('Deu retornar false davant moviments horitzontals', function() {
+      expect(isDiagonalDescendent('a1', 'h1')).toBe(false);
+      expect(isDiagonalDescendent('h1', 'a1')).toBe(false);
+    });
+    it('Deu retornar false davant moviments verticals', function() {
+      expect(isDiagonalDescendent('a1', 'a3')).toBe(false);
+      expect(isDiagonalDescendent('a3', 'a1')).toBe(false);
+    });
+    
+    
+  })
+})
+

@@ -1,4 +1,9 @@
-
+//Explicació a grans trets de l'algoritme:
+//S'agafen les peces de l'oponent i en funció del tipus de peça s'aplica les seues funcions de moviment
+//p.ex -> per a la torre s'apliquen les funcions de generació de rangs horitzontals, doncs
+//és l'única direcció vàlida per a la peça
+//Aquestes funcions tracen un rang de coordenades fins que es topen amb l'última peça
+//Si l'última peça es el rei de l'oponent hi ha jaque.
 export {
   limits
 };
