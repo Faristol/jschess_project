@@ -10,4 +10,4 @@ Prepárate para sumergirte en un tablero donde las piezas tienen personalidades 
 Reglas Pendientes
 -----------------------------------------------------------------------------------------------------------------------------------------
 Aunque la diversión está garantizada, debo confesar que algunas reglas clásicas del ajedrez aún no han sido implementadas.
-¡Pero no te preocupes! En el futuro, planeo añadir funciones como el enroque, la promoción, el "stalemate" y más.
+¡Pero no te preocupes! En el futuro, planeo añadir funciones como el enroque, la promoción, el "stalemate" y más. Así como una mejora en el algoritmo de detección del jaque-mate, ya que, aunque detecta la mayoría de los casos, hay en los que falla. 
